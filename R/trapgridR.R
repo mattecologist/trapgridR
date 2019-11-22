@@ -7,10 +7,11 @@
 #' @param filepath Path of the corpus.
 #' @return a Java instance of SpellCorrector
 #' @export
-trapgridR<-function(filepath='big.txt') {
+trapgridR<-function(filepath='foogrid') {
   .jaddLibrary('trapgrid', 'inst/java/TrapGrid.jar')
   .jaddClassPath('inst/java/TrapGrid.jar')
   trapgrid<- .jnew('com.reallymany.trapgrid.Driver')
-  .jcall(obj=trapgrid, method="main", c("-tg",paste0(dir_to_java, "foogrid")), returnSig = "V")
+  foogrid<- .jnew('java/io/File', filepath)
+  .jcall(obj=trapgrid, method="main", c("-tg",foogrid), returnSig = "V")
   return(trapgrid)
 }
