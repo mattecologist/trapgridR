@@ -4,16 +4,20 @@
 \alias{trapgridR}
 \title{Retrieve a Java instance of TrapGrid.}
 \usage{
-trapgridR(filepath = "big.txt")
+trapgridR(
+  filepath = "inst/java/foogrid",
+  nDays = 14,
+  nFlies = 100,
+  nSim = 10,
+  D = 10^5
+)
 }
 \arguments{
-\item{filepath}{Path of the corpus.}
+\item{filepath}{Path of the trapping grid file}
 }
 \value{
-a Java instance of SpellCorrector
+Model output
 }
 \description{
-Retrieve a Java instance of SpellCorrector, with the training file
-specified. Language model is trained before the instance is returned.
-The spell corrector is adapted from Peter Norvig's demonstration.
+Retrieve a Java instance of TrapGrid
 }
