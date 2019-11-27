@@ -11,6 +11,7 @@ trapgridR<-function(filepath= "inst/java/foogrid",
                     nFlies =100, #[-nf <number of flies per outbreak>]
                     nSim =10, # [-ns <number of simulations>]
                     D= 10^5) {
+  rJava::.jinit()
   rJava::.jaddLibrary('trapgrid', 'inst/java/TrapGrid.jar')
   rJava::.jaddClassPath('inst/java/TrapGrid.jar')
   trapgrid <- rJava::.jnew('com.reallymany.trapgrid.Driver')
