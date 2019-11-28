@@ -3,6 +3,10 @@
 #' Retrieve a Java instance of TrapGrid
 #'
 #' @param filepath Path of the trapping grid file
+#' @param nDays Number of days to run simulation
+#' @param nFlies Number of flies per outbreak
+#' @param nSim Number of simulations
+#' @param D Dispersal parameter
 #' @return Model output
 #' @export
 
@@ -55,8 +59,15 @@ trapgridR<-function(filepath= "inst/java/foogrid",
   }
 
   #head (simRuns)
+  fn1 <- "out.txt"
+  if (file.exists(fn1)){file.remove(fn1)}
+  fn2 <- "fly.csv"
+  if (file.exists(fn2)){file.remove(fn2)}
 
-  return(list(simRuns, fly_loc))
+  out_list <- list(simRuns, fly_loc)
+  names(out_list) <- c("simRuns", "flyLoc")
+
+  return(out_list)
 }
 
 

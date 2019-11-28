@@ -11,3 +11,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: rJava (>= 0.9-11)
 RoxygenNote: 7.0.0
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

@@ -1,0 +1,64 @@
+---
+title: "trapgrid-in-R"
+author: "Matt Hill"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{trapgrid-in-R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The following is a demonstration of an interace with the java program "TrapGrid" (ref) using R. Calling this program from R allows for multiple simulations to be run, and the results to be easily collated and summarised.
+
+```{r setup}
+library(trapgridR)
+```
+
+```{r}
+make_trapping_grid("my_grid")
+```
+
+
+```{r}
+model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 100, nSim=10, D=10^5)
+```
+```{r plot of simulation results}
+library (ggplot2)
+ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, group=SimRun))+
+  geom_line()+
+  theme_dark()+
+  scale_x_continuous(expand=c(0.01,0))+
+  scale_y_continuous(expand=c(0,0.01))
+
+```
+
+```{r}
+ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
+  geom_point()+
+  facet_wrap(.~as.integer(Day))+
+  scale_colour_viridis_c()+
+  theme_dark()
+
+```
+
+```{r}
+# library(gganimate)
+# ggplot(model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number))) +
+#   geom_point(alpha = 0.7, show.legend = FALSE, size=3) +
+#   scale_colour_viridis_c()+
+#   scale_size(range = c(2, 12)) +
+#   # Here comes the gganimate specific bits
+#   labs(title = 'Day: {frame_time}', x = 'X', y = 'Y') +
+#   transition_time(as.integer(Day)) +
+#   ease_aes('linear')
+
+
+```

@@ -14,6 +14,14 @@ trapgridR(
 }
 \arguments{
 \item{filepath}{Path of the trapping grid file}
+
+\item{nDays}{Number of days to run simulation}
+
+\item{nFlies}{Number of flies per outbreak}
+
+\item{nSim}{Number of simulations}
+
+\item{D}{Dispersal parameter}
 }
 \value{
 Model output
