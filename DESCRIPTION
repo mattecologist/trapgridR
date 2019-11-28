@@ -15,3 +15,7 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+Imports: 
+    raster,
+    rgeos,
+    sp

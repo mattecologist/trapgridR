@@ -107,3 +107,76 @@ return(print(paste("Trapping grid ", gridname, "written")))
 
 }
 
+#' Setup outbreak file
+#'
+#' @param traps Name for the trapping grid file to be output
+#' @param in_orchard True/False flag for whether flies can emerge from within orchard
+#' @return A trapping grid text file
+#' @export
+
+
+make_outbreak_file <- function (traps=traps,
+                                in_orchard = TRUE){
+  # Function to generate an outbreak file
+  # TrapGrid: "You may supply an optional Outbreak file, which is a two-column tab-delimited file containing the x and y locations of outbreaks to be simulated."
+  x1 <- min(traps[,1]-100)
+  x2 <- max(traps[,1]+100)
+  y1 <- min(traps[,2]-100)
+  y2 <- max(traps[,2]+100)
+
+  ## ISSUE: trapgrid can't take -ve numbers.... need to apply a correction...
+  ## apply correction to traps
+  traps[,1] <- traps[,1] - x1
+  traps[,2] <- traps[,2] - y1
+
+  outbreak_set <- as.data.frame(spsample(SpatialPoints(rbind(cbind(x1, y1), cbind(x2, y2))),
+                                         n=nSim,
+                                         type="random"))
+
+  outbreak_set[,1] <- outbreak_set[,1] - x1
+  outbreak_set[,2] <- outbreak_set[,2] - y1
+
+  outbreak_set <- round(outbreak_set, 0)
+
+  if (in_orchard == FALSE){
+    hpts <- chull(traps[,1:2])
+    hpts <- c(hpts, hpts[1])
+    polyline <- traps[,1:2][hpts, ]
+    polytemp <- SpatialPolygons(list(Polygons(list(Polygon(polyline)), ID=1)))
+
+    orchard_buffer <- rgeos::gBuffer(polytemp, width=25, byid=TRUE)
+    outbreak_buffer <- rgeos::gBuffer(orchard_buffer, width=250, byid=TRUE)
+
+    outbreak_set <- data.frame()
+    zz <- 0
+    ## zz is a counter - this sets it to be 1 outbreak per 10000m^2
+    while (zz < round(raster::area(outbreak_buffer)/10000, 0)){
+      temp_point <- spsample(outbreak_buffer,
+                             n=1,
+                             type="random")
+      if (is.na(over(temp_point, orchard_buffer))){
+        outbreak_set <- rbind(outbreak_set, as.matrix(as.data.frame(temp_point))[,1:2])
+        zz <- zz +1
+      }
+    }
+  }else{
+    orchard_buffer=NA
+    outbreak_buffer=NA
+  }
+
+  traps_sp <- SpatialPoints(traps[,1:2])
+  buffer_traps <- rgeos::gBuffer(traps_sp, width=1/lambda)
+
+  write.table(outbreak_set, paste0(dir_to_jar,"outbreaks"),
+              na = "",
+              row.names = FALSE,
+              col.names = FALSE,
+              sep = "\t",
+              append=FALSE)
+  return(list("outbreak_set"=outbreak_set, "traps_sp"=traps_sp,
+              "buffer_traps" = buffer_traps, "orchard_buffer"=orchard_buffer,
+              "outbreak_buffer"=outbreak_buffer))
+}
+
+
+
