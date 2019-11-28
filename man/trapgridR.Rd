@@ -9,7 +9,8 @@ trapgridR(
   nDays = 14,
   nFlies = 100,
   nSim = 10,
-  D = 10^5
+  D = 10^5,
+  outbreaks = NULL
 )
 }
 \arguments{

@@ -22,8 +22,9 @@ The following is a demonstration of an interace with the java program "TrapGrid"
 library(trapgridR)
 ```
 
+There is a simple function to make a regular grid across a given area
 ```{r}
-make_trapping_grid("my_grid")
+make_regular_grid("my_grid")
 ```
 
 
@@ -49,16 +50,56 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
 
 ```
 
-```{r}
-# library(gganimate)
-# ggplot(model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number))) +
-#   geom_point(alpha = 0.7, show.legend = FALSE, size=3) +
-#   scale_colour_viridis_c()+
-#   scale_size(range = c(2, 12)) +
-#   # Here comes the gganimate specific bits
-#   labs(title = 'Day: {frame_time}', x = 'X', y = 'Y') +
-#   transition_time(as.integer(Day)) +
-#   ease_aes('linear')
+Lets pretend the actual Orchard is an 800 x 800 m square with 10 random traps placed in it.
 
+```{r}
+
+traps <- data.frame()
+for (i in 1:10){
+  temp <- runif(2, 0, 800)
+  traps <- rbind(traps, temp)
+}
+names (traps) <- c("Latitude", "Longitude")
+
+plot (traps[,"Latitude"]~ traps[,"Longitude"])
 
 ```
+```{r}
+#Assign a lamba (trap attractiveness)
+make_actual_grid(gridname="orchard_traps", traps, lambda = 0.005)
+```
+
+```{r}
+outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = FALSE,
+                   outbreak_name = "outbreaks")
+```
+
+```{r}
+model2 <- trapgridR("orchard_traps", nDays=28, nFlies=5, nSim=10, D=10^5, outbreaks = "outbreaks")
+```
+
+```{r}
+outbreaks <- tidyr::separate(model2$simRuns, Outbreak.Location, into=c("X", "Y"), sep=",")[,c("X", "Y")]
+outbreaks <- outbreaks[complete.cases(outbreaks),]
+outbreaks$X <- as.numeric(gsub("\\(|\\)", "", outbreaks$X))
+outbreaks$Y <- as.numeric(gsub("\\(|\\)", "", outbreaks$Y))
+outbreaks <- unique(cbind(outbreaks$X, outbreaks$Y))
+outbreaks <- sp::SpatialPoints(outbreaks[,1:2]) 
+```
+
+```{r}
+cols <- viridis::viridis(3)
+
+orchard_layout <- ggplot (data=as.data.frame(outbreaks.data$traps_sp), aes(coords.x1, coords.x2)) +
+  geom_point(size=2, shape=7)+
+  geom_point(data=as.data.frame(outbreaks), aes(coords.x1, coords.x2), colour=cols[3], alpha=0.5)+
+  geom_polygon(data=outbreaks.data$buffer_traps, aes(x=long, y=lat, group = group), colour=cols[2], fill=cols[2], alpha=0.45)+
+  geom_polygon(data=outbreaks.data$orchard_buffer, aes(x=long, y=lat, group = group), alpha=0.2, fill=cols[1])+
+  theme_dark()+
+  coord_equal()+
+  xlab("X (m)")+
+  ylab("Y (m)")+
+  ggtitle(paste0("1/lambda: ",round(1/0.005,2), ", Outbreaks: ", round(raster::area(outbreaks.data$outbreak_buffer)/10000, 0)))
+
+```
+

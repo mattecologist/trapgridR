@@ -4,7 +4,12 @@
 \alias{make_outbreak_file}
 \title{Setup outbreak file}
 \usage{
-make_outbreak_file(traps = traps, in_orchard = TRUE)
+make_outbreak_file(
+  traps = traps,
+  in_orchard = TRUE,
+  nSim = 10,
+  outbreak_name = "outbreaks"
+)
 }
 \arguments{
 \item{traps}{Name for the trapping grid file to be output}

@@ -14,16 +14,27 @@ trapgridR<-function(filepath= "inst/java/foogrid",
                     nDays =14, #[-nd <number of days>]
                     nFlies =100, #[-nf <number of flies per outbreak>]
                     nSim =10, # [-ns <number of simulations>]
-                    D= 10^5) {
+                    D= 10^5,
+                    outbreaks=NULL) {
   rJava::.jinit()
   rJava::.jaddLibrary('trapgrid', 'inst/java/TrapGrid.jar')
   rJava::.jaddClassPath('inst/java/TrapGrid.jar')
   trapgrid <- rJava::.jnew('com.reallymany.trapgrid.Driver')
-  rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
-                                               "-nf", nFlies,
-                                               "-nd", nDays,
-                                               "-ns", nSim,
-                                               "-dc", D), returnSig = "V")
+
+  if (!is.null(outbreaks)){
+    rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
+                                                 "-nf", nFlies,
+                                                 "-nd", nDays,
+                                                 "-ns", nSim,
+                                                 "-dc", D,
+                                                 "-ob", outbreaks), returnSig = "V")
+  } else {
+    rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
+                                                 "-nf", nFlies,
+                                                 "-nd", nDays,
+                                                 "-ns", nSim,
+                                                 "-dc", D), returnSig = "V")
+  }
 
 
   hold <- scan(paste0("out.txt"), skip=4, blank.lines.skip = TRUE, nlines=nDays)
@@ -81,7 +92,7 @@ trapgridR<-function(filepath= "inst/java/foogrid",
 #' @return A trapping grid text file
 #' @export
 
-make_trapping_grid <- function(gridname="footest",
+make_regular_grid <- function(gridname="footest",
                                 gridSize= c(364, 572),
                                 gridSpace=80,
                                 lambda=0.02){
@@ -107,6 +118,36 @@ return(print(paste("Trapping grid ", gridname, "written")))
 
 }
 
+#' Setup actual trapping grid
+#'
+#' @param gridname Name for the trapping grid file to be output
+#' @param gridSize Describes the bottom right corner in metres, from the top left corner which is 0,0
+#' @param gridSpace The distance between regularly spaced traps
+#' @param lambda The trap efficiency
+#' @return A trapping grid text file
+#' @export
+
+make_actual_grid <- function(gridname="footest",
+                             traps=traps,
+                            lambda=0.005){
+
+traps <- cbind(traps, lambda=rep(lambda, length(traps[,1])))
+
+gridSize <- c(max(traps[,"Latitude"]) , max(traps[,"Longitude"]))
+gridSize <- round(gridSize, 0)
+
+cat(paste(gridSize), sep="\t", file=gridname)
+cat("\n", paste(""), file=gridname, append=TRUE)
+write.table(traps, file=gridname,
+            na = "",
+            row.names = FALSE,
+            col.names = FALSE,
+            sep = "\t",
+            append=TRUE)
+
+return(print(paste("Trapping grid ", gridname, "written")))
+}
+
 #' Setup outbreak file
 #'
 #' @param traps Name for the trapping grid file to be output
@@ -116,7 +157,10 @@ return(print(paste("Trapping grid ", gridname, "written")))
 
 
 make_outbreak_file <- function (traps=traps,
-                                in_orchard = TRUE){
+                                in_orchard = TRUE,
+                                nSim=10,
+                                outbreak_name = "outbreaks",
+                                lambda=0.05){
   # Function to generate an outbreak file
   # TrapGrid: "You may supply an optional Outbreak file, which is a two-column tab-delimited file containing the x and y locations of outbreaks to be simulated."
   x1 <- min(traps[,1]-100)
@@ -129,7 +173,7 @@ make_outbreak_file <- function (traps=traps,
   traps[,1] <- traps[,1] - x1
   traps[,2] <- traps[,2] - y1
 
-  outbreak_set <- as.data.frame(spsample(SpatialPoints(rbind(cbind(x1, y1), cbind(x2, y2))),
+  outbreak_set <- as.data.frame(sp::spsample(sp::SpatialPoints(rbind(cbind(x1, y1), cbind(x2, y2))),
                                          n=nSim,
                                          type="random"))
 
@@ -142,7 +186,7 @@ make_outbreak_file <- function (traps=traps,
     hpts <- chull(traps[,1:2])
     hpts <- c(hpts, hpts[1])
     polyline <- traps[,1:2][hpts, ]
-    polytemp <- SpatialPolygons(list(Polygons(list(Polygon(polyline)), ID=1)))
+    polytemp <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(polyline)), ID=1)))
 
     orchard_buffer <- rgeos::gBuffer(polytemp, width=25, byid=TRUE)
     outbreak_buffer <- rgeos::gBuffer(orchard_buffer, width=250, byid=TRUE)
@@ -151,10 +195,10 @@ make_outbreak_file <- function (traps=traps,
     zz <- 0
     ## zz is a counter - this sets it to be 1 outbreak per 10000m^2
     while (zz < round(raster::area(outbreak_buffer)/10000, 0)){
-      temp_point <- spsample(outbreak_buffer,
+      temp_point <- sp::spsample(outbreak_buffer,
                              n=1,
                              type="random")
-      if (is.na(over(temp_point, orchard_buffer))){
+      if (is.na(sp::over(temp_point, orchard_buffer))){
         outbreak_set <- rbind(outbreak_set, as.matrix(as.data.frame(temp_point))[,1:2])
         zz <- zz +1
       }
@@ -164,15 +208,18 @@ make_outbreak_file <- function (traps=traps,
     outbreak_buffer=NA
   }
 
-  traps_sp <- SpatialPoints(traps[,1:2])
+  traps_sp <- sp::SpatialPoints(traps[,1:2])
   buffer_traps <- rgeos::gBuffer(traps_sp, width=1/lambda)
 
-  write.table(outbreak_set, paste0(dir_to_jar,"outbreaks"),
+  write.table(outbreak_set, outbreak_name,
               na = "",
               row.names = FALSE,
               col.names = FALSE,
               sep = "\t",
               append=FALSE)
+
+  print(paste("Outbreak file", outbreak_name, "written"))
+
   return(list("outbreak_set"=outbreak_set, "traps_sp"=traps_sp,
               "buffer_traps" = buffer_traps, "orchard_buffer"=orchard_buffer,
               "outbreak_buffer"=outbreak_buffer))
