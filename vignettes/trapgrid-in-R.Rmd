@@ -23,7 +23,7 @@ library(trapgridR)
 ```
 
 There is a simple function to make a regular grid across a given area
-```{r}
+```{r, fig.width=6, fig.height=6}
 make_regular_grid("my_grid")
 ```
 
@@ -31,7 +31,7 @@ make_regular_grid("my_grid")
 ```{r}
 model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 100, nSim=10, D=10^5)
 ```
-```{r plot of simulation results}
+```{r plot of simulation results, fig.width=7, fig.height=7}
 library (ggplot2)
 ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, group=SimRun))+
   geom_line()+
@@ -41,7 +41,7 @@ ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, 
 
 ```
 
-```{r}
+```{r fig.width=7, fig.height=7}
 ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
   geom_point()+
   facet_wrap(.~as.integer(Day))+
