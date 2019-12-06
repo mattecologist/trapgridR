@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The following is a demonstration of an interace with the java program "TrapGrid" (ref) using R. Calling this program from R allows for multiple simulations to be run, and the results to be easily collated and summarised.
+trapgridR is an interace for the java program "TrapGrid" (ref) using R. Calling this program from R allows for multiple simulations to be run, and the results to be easily collated and summarised.
 
 ## Installation
 

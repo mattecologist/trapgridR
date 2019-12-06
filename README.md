@@ -7,10 +7,10 @@
 
 <!-- badges: end -->
 
-The following is a demonstration of an interace with the java program
-“TrapGrid” (ref) using R. Calling this program from R allows for
-multiple simulations to be run, and the results to be easily collated
-and summarised.
+trapgridR is an interace for the java program “TrapGrid” (Manoukis et
+al. 2015) using R. Calling this program from R allows for multiple
+simulations to be run, and the results to be easily collated and
+summarised.
 
 ## Installation
 
@@ -29,8 +29,7 @@ library(trapgridR)
 #> Loading required package: rJava
 ```
 
-There is a simple function to make a regular grid across a given
-area
+There is a simple function to make a regular grid across a given area
 
 ``` r
 make_regular_grid("my_grid")
@@ -40,9 +39,14 @@ make_regular_grid("my_grid")
 
     #> [1] "Trapping grid  my_grid written"
 
+Simulations can be setup in R and results stored as
+objects
+
 ``` r
 model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 100, nSim=10, D=10^5)
 ```
+
+Simulation results can be plotted from the model objects
 
 ``` r
 library (ggplot2)
@@ -55,6 +59,10 @@ ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, 
 
 <img src="man/figures/README-plot of simulation results-1.png" width="100%" />
 
+Additionally, fly locations from the simulation can be plotted to
+examine movement
+patterns
+
 ``` r
 ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
   geom_point()+
@@ -64,3 +72,9 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+# References
+
+Manoukis, Nicholas C., Brian Hall, and Scott M. Geib. “A Computer Model
+of Insect Traps in a Landscape.” Scientific Reports 4, no. 1 (May 2015).
+<https://doi.org/10.1038/srep07015>.
