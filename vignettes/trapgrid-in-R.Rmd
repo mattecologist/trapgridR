@@ -101,5 +101,6 @@ orchard_layout <- ggplot (data=as.data.frame(outbreaks.data$traps_sp), aes(coord
   ylab("Y (m)")+
   ggtitle(paste0("1/lambda: ",round(1/0.005,2), ", Outbreaks: ", round(raster::area(outbreaks.data$outbreak_buffer)/10000, 0)))
 
+
 ```
 

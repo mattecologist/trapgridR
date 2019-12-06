@@ -8,7 +8,8 @@ make_outbreak_file(
   traps = traps,
   in_orchard = TRUE,
   nSim = 10,
-  outbreak_name = "outbreaks"
+  outbreak_name = "outbreaks",
+  lambda = 0.05
 )
 }
 \arguments{
