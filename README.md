@@ -35,7 +35,7 @@ There is a simple function to make a regular grid across a given area
 make_regular_grid("my_grid")
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="50%" />
 
     #> [1] "Trapping grid  my_grid written"
 
@@ -57,7 +57,7 @@ ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, 
   scale_y_continuous(expand=c(0,0.01))
 ```
 
-<img src="man/figures/README-plot of simulation results-1.png" width="100%" />
+<img src="man/figures/README-plot of simulation results-1.png" width="50%" />
 
 Additionally, fly locations from the simulation can be plotted to
 examine movement
@@ -71,7 +71,7 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
   theme_dark()
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="50%" />
 
 …..which is a bit messy, so using `{gganimate}` can make an animation:
 
@@ -84,7 +84,7 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
   theme_dark()
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.gif" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.gif" width="50%" />
 
 We’ve included functions so that actualy trap arrangements can be easily
 be used in R, and are implementing further changes to the model that
