@@ -38,7 +38,7 @@ library(trapgridR)
 ```
 
 There is a simple function to make a regular grid across a given area
-```{r}
+```{r figure.width=4, figure.height=4}
 make_regular_grid("my_grid")
 ```
 
@@ -48,7 +48,7 @@ model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 100, nSim=10, D=10^
 ```
 
 Simulation results can be plotted from the model objects
-```{r plot of simulation results}
+```{r plot of simulation results, figure.width=4, figure.height=3}
 library (ggplot2)
 ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, group=SimRun))+
   geom_line()+
@@ -58,15 +58,31 @@ ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, 
 
 ```
 
-Additionally, fly locations from the simulation can be plotted to examine movement patterns
-```{r}
+Additionally, fly locations from the simulation can be plotted to examine movement patterns....
+```{r figure.width=4, figure.height=4}
 ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
   geom_point()+
   facet_wrap(.~as.integer(Day))+
   scale_colour_viridis_c()+
   theme_dark()
+```
+
+
+
+
+.....which is a bit messy, so using `{gganimate}` can make an animation:
+
+```{r figure.width=3, figure.height=3}
+library (gganimate)
+ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
+  geom_point()+
+  transition_time(as.integer(Day)) +
+  scale_colour_viridis_c()+
+  theme_dark()
 
 ```
+
+We've included functions so that actualy trap arrangements can be easily be used in R, and are implementing further changes to the model that allow specification of further biological and trapping parameters.
 
 # References
 

@@ -61,7 +61,7 @@ ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, 
 
 Additionally, fly locations from the simulation can be plotted to
 examine movement
-patterns
+patterns….
 
 ``` r
 ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
@@ -72,6 +72,23 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+…..which is a bit messy, so using `{gganimate}` can make an animation:
+
+``` r
+library (gganimate)
+ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
+  geom_point()+
+  transition_time(as.integer(Day)) +
+  scale_colour_viridis_c()+
+  theme_dark()
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.gif" width="100%" />
+
+We’ve included functions so that actualy trap arrangements can be easily
+be used in R, and are implementing further changes to the model that
+allow specification of further biological and trapping parameters.
 
 # References
 
