@@ -21,9 +21,9 @@ knitr::opts_chunk$set(
 trapgridR is an interace for the java program "TrapGrid" (Manoukis et al. 2015) using R. Calling this program from R allows for multiple simulations to be run, and the results to be easily collated and summarised.
 
 
-
-
 ## Installation
+
+Prior to installation, make sure you have `{rJava}` installed and working. This may require installation of Java first (e.g. https://openjdk.java.net/)
 
 You can install the development version from [GitHub](https://github.com/) with:
 
@@ -31,6 +31,9 @@ You can install the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("mattecologist/trapgridR")
 ```
+
+
+
 ## Example
 
 ```{r setup}

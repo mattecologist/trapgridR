@@ -89,13 +89,16 @@ outbreaks <- sp::SpatialPoints(outbreaks[,1:2])
 
 ```{r}
 cols <- viridis::viridis(3)
+library (ggsci)
+library (ggplot2)
 
-orchard_layout <- ggplot (data=as.data.frame(outbreaks.data$traps_sp), aes(coords.x1, coords.x2)) +
+
+ggplot (data=as.data.frame(outbreaks.data$traps_sp), aes(Latitude, Longitude)) +
   geom_point(size=2, shape=7)+
-  geom_point(data=as.data.frame(outbreaks), aes(coords.x1, coords.x2), colour=cols[3], alpha=0.5)+
+  geom_point(data=as.data.frame(outbreaks), aes(coords.x1, coords.x2), colour=cols[3], alpha=0.8)+
   geom_polygon(data=outbreaks.data$buffer_traps, aes(x=long, y=lat, group = group), colour=cols[2], fill=cols[2], alpha=0.45)+
   geom_polygon(data=outbreaks.data$orchard_buffer, aes(x=long, y=lat, group = group), alpha=0.2, fill=cols[1])+
-  theme_dark()+
+  theme_minimal()+
   coord_equal()+
   xlab("X (m)")+
   ylab("Y (m)")+

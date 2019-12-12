@@ -10,15 +10,15 @@
 #' @return Model output
 #' @export
 
-trapgridR<-function(filepath= "inst/java/foogrid",
+trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/foogrid"),
                     nDays =14, #[-nd <number of days>]
                     nFlies =100, #[-nf <number of flies per outbreak>]
                     nSim =10, # [-ns <number of simulations>]
                     D= 10^5,
                     outbreaks=NULL) {
   rJava::.jinit()
-  rJava::.jaddLibrary('trapgrid', 'inst/java/TrapGrid.jar')
-  rJava::.jaddClassPath('inst/java/TrapGrid.jar')
+  rJava::.jaddLibrary('trapgrid', paste0(system.file(package="trapgridR"), "/java/TrapGrid.jar"))
+  rJava::.jaddClassPath(paste0(system.file(package="trapgridR"), "/java/TrapGrid.jar"))
   trapgrid <- rJava::.jnew('com.reallymany.trapgrid.Driver')
 
   if (!is.null(outbreaks)){
@@ -116,6 +116,63 @@ write.table(traps, file=paste0(gridname),
 
 return(print(paste("Trapping grid ", gridname, "written")))
 
+}
+
+#' Setup random trapping grid
+#'
+#' Generate a random distribution of grids on a defined rectangle (in metres)
+#' Can inclue a perimeter trap on each boundary if desired
+#' Calculates that each trap is a mininum distance apart before writing out trap grid file
+#'
+#' @param gridname Name for the trapping grid file to be output
+#' @param lambda The trap efficiency
+#' @param n.traps Number of random traps
+#' @param perim Include perimeter traps or not
+#' @param x1 Width of area (begins at 0)
+#' @param y1 Height of area (begins at 0)
+#' @param d Minimum distance between each trap
+#' @param trials How many attempts to generate trap arrangement with given parameters
+#' @return A trapping grid text file
+#' @export
+
+make_random_grid <- function(n.traps=10,
+                             x1=2000,
+                             y1=2000,
+                             d=400,
+                             trials = 1000,
+                             perim=FALSE,
+                             gridname="footest",
+                             lambda=0.02){
+  gridSize <- c(x1, y1)
+  for(i in 1:trials){
+
+    randos <- cbind(runif(n.traps,0,x1),runif(n.traps,0,y1))
+    if (perim == TRUE){
+      peri <- (rbind(c(0, runif(1, 0, x1)),
+                     c(x1, runif(1, 0, y1)),
+                     c(runif(1, 0, x1),y1),
+                     c(runif(1, 0, x1),0)))
+      traps <- rbind(peri, randos)
+    }
+    else traps <- randos
+
+    if(min(dist(traps)) >= d){
+      traps <- cbind(round(traps[,2],0), round(traps[,1],0), rep(lambda, length(traps[1])))
+
+      ## Write out the trapping grid file - the second line is a fix to append the table to a new line - the java file can't have a tab space at the end of the first line
+      cat(paste(gridSize), sep="\t", file=paste0(gridname))
+      cat("\n", paste(""), file=paste0(gridname), append=TRUE)
+      write.table(traps, file=paste0(gridname),
+                  na = "",
+                  row.names = FALSE,
+                  col.names = FALSE,
+                  sep = "\t",
+                  append=TRUE)
+      plot (traps[,2]~traps[,1])
+
+      return(message("Trapping grid ", gridname, " written"))}
+  }
+  return(message("Unable to generate this landscape - try making it bigger, or min distance smaller"))
 }
 
 #' Setup actual trapping grid

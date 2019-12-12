@@ -2,5 +2,6 @@
 
 export(make_actual_grid)
 export(make_outbreak_file)
+export(make_random_grid)
 export(make_regular_grid)
 export(trapgridR)
