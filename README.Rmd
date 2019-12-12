@@ -51,6 +51,12 @@ There is a simple function to make a regular grid across a given area
 ```{r fig.width=5, fig.height=5}
 make_regular_grid("my_grid")
 ```
+Or make a random grid of at least a minimum distance apart, that can include perimeter traps or not
+
+```{r fig.width=5, fig.height=5}
+make_random_grid(n.traps=5, gridname="my_grid", perim=TRUE)
+```
+
 
 Simulations can be setup in R and results stored as objects
 ```{r}
@@ -69,7 +75,7 @@ ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, 
 ```
 
 Additionally, fly locations from the simulation can be plotted to examine movement patterns....
-```{r fig.width=5, fig.height=5}
+```{r fig.width=5, fig.height=4}
 ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
   geom_point()+
   facet_wrap(.~as.integer(Day))+
@@ -82,9 +88,9 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
 
 .....which is a bit messy, so using `{gganimate}` can make an animation:
 
-```{r fig.width=5, fig.height=5}
+```{r fig.width=5, fig.height=4}
 library (gganimate)
-ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
+ggplot (model1$flyLoc[model1$flyLoc$Simulation.Number==1:3,], aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
   geom_point()+
   transition_time(as.integer(Day)) +
   scale_colour_viridis_c()+

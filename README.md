@@ -49,6 +49,16 @@ make_regular_grid("my_grid")
 
     #> [1] "Trapping grid  my_grid written"
 
+Or make a random grid of at least a minimum distance apart, that can
+include perimeter traps or not
+
+``` r
+make_random_grid(n.traps=5, gridname="my_grid", perim=TRUE)
+#> Trapping grid my_grid written
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="50%" />
+
 Simulations can be setup in R and results stored as
 objects
 
@@ -81,20 +91,24 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
   theme_dark()
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="50%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="50%" />
 
 …..which is a bit messy, so using `{gganimate}` can make an animation:
 
 ``` r
 library (gganimate)
-ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
+ggplot (model1$flyLoc[model1$flyLoc$Simulation.Number==1:3,], aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
   geom_point()+
   transition_time(as.integer(Day)) +
   scale_colour_viridis_c()+
   theme_dark()
+#> Warning in `==.default`(model1$flyLoc$Simulation.Number, 1:3): longer object
+#> length is not a multiple of shorter object length
+#> Warning in is.na(e1) | is.na(e2): longer object length is not a multiple of
+#> shorter object length
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.gif" width="50%" />
+<img src="man/figures/README-unnamed-chunk-6-1.gif" width="50%" />
 
 We’ve included functions so that actualy trap arrangements can be easily
 be used in R, and are implementing further changes to the model that
