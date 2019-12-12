@@ -23,7 +23,14 @@ trapgridR is an interace for the java program "TrapGrid" (Manoukis et al. 2015) 
 
 ## Installation
 
-Prior to installation, make sure you have `{rJava}` installed and working. This may require installation of Java first (e.g. https://openjdk.java.net/)
+Prior to installation, make sure you have `{rJava}` installed and working. This may require installation of Java first. For example on Ubuntu:
+
+`sudo apt-get install -y default-jre`
+
+`sudo apt-get install -y default-jdk`
+
+`sudo R CMD javareconf`
+
 
 You can install the development version from [GitHub](https://github.com/) with:
 
