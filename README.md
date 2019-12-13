@@ -63,21 +63,26 @@ Simulations can be setup in R and results stored as
 objects
 
 ``` r
-model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 100, nSim=10, D=10^5)
+model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 100, nSim=20, D=10^5)
 ```
 
-Simulation results can be plotted from the model objects
+Simulation results can be plotted from the model objects.
 
 ``` r
 library (ggplot2)
-ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, group=SimRun))+
-  geom_line()+
+ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability))+
+  geom_line(aes(group=SimRun), colour=viridis::viridis(3)[1], alpha=0.3)+
+  geom_smooth(method="loess", colour=viridis::viridis(3)[2])+
   theme_dark()+
   scale_x_continuous(expand=c(0.01,0))+
-  scale_y_continuous(expand=c(0,0.01))
+  scale_y_continuous(expand=c(0,0.01))+
+  theme_minimal()
 ```
 
 <img src="man/figures/README-plot of simulation results-1.png" width="50%" />
+Each the 1-cumulative escape probability can be thought of as the
+detection probability - which only reaches around 0.25 after 2 weeks in
+this example.
 
 Additionally, fly locations from the simulation can be plotted to
 examine movement
@@ -88,7 +93,7 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
   geom_point()+
   facet_wrap(.~as.integer(Day))+
   scale_colour_viridis_c()+
-  theme_dark()
+  theme_minimal()
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="50%" />
@@ -97,18 +102,17 @@ ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simu
 
 ``` r
 library (gganimate)
-ggplot (model1$flyLoc[model1$flyLoc$Simulation.Number==1:3,], aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
+ggplot (model1$flyLoc[model1$flyLoc$Simulation.Number==1:4,], aes(as.integer(X), as.integer(Y),  colour=Simulation.Number))+
   geom_point()+
   transition_time(as.integer(Day)) +
-  scale_colour_viridis_c()+
-  theme_dark()
-#> Warning in `==.default`(model1$flyLoc$Simulation.Number, 1:3): longer object
-#> length is not a multiple of shorter object length
-#> Warning in is.na(e1) | is.na(e2): longer object length is not a multiple of
-#> shorter object length
+  scale_colour_viridis_d()+
+  theme_minimal()+
+  facet_wrap(~Simulation.Number, nrow = 2)
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.gif" width="50%" />
+which isn’t really that useful, except to show each fly is being tracked
+through each simulation :)
 
 We’ve included functions so that actualy trap arrangements can be easily
 be used in R, and are implementing further changes to the model that
