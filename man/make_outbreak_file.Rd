@@ -9,13 +9,22 @@ make_outbreak_file(
   in_orchard = TRUE,
   nSim = 10,
   outbreak_name = "outbreaks",
-  lambda = 0.05
+  lambda = 0.05,
+  per_area = FALSE
 )
 }
 \arguments{
 \item{traps}{Name for the trapping grid file to be output}
 
 \item{in_orchard}{True/False flag for whether flies can emerge from within orchard}
+
+\item{nSim}{Number of sims}
+
+\item{outbreak_name}{Name of file to write out}
+
+\item{lambda}{The trap efficiency}
+
+\item{per_area}{Flag to override the num_outbreaks and do it by area}
 }
 \value{
 A trapping grid text file

@@ -5,7 +5,7 @@
 \title{Retrieve a Java instance of TrapGrid.}
 \usage{
 trapgridR(
-  filepath = "inst/java/foogrid",
+  filepath = paste0(system.file(package = "trapgridR"), "/java/foogrid"),
   nDays = 14,
   nFlies = 100,
   nSim = 10,

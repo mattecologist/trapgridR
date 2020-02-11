@@ -209,6 +209,10 @@ return(print(paste("Trapping grid ", gridname, "written")))
 #'
 #' @param traps Name for the trapping grid file to be output
 #' @param in_orchard True/False flag for whether flies can emerge from within orchard
+#' @param nSim Number of sims
+#' @param outbreak_name Name of file to write out
+#' @param lambda The trap efficiency
+#' @param per_area Flag to override the num_outbreaks and do it by area
 #' @return A trapping grid text file
 #' @export
 
@@ -217,7 +221,8 @@ make_outbreak_file <- function (traps=traps,
                                 in_orchard = TRUE,
                                 nSim=10,
                                 outbreak_name = "outbreaks",
-                                lambda=0.05){
+                                lambda=0.05,
+                                per_area=FALSE){
   # Function to generate an outbreak file
   # TrapGrid: "You may supply an optional Outbreak file, which is a two-column tab-delimited file containing the x and y locations of outbreaks to be simulated."
   x1 <- min(traps[,1]-100)
@@ -249,9 +254,20 @@ make_outbreak_file <- function (traps=traps,
     outbreak_buffer <- rgeos::gBuffer(orchard_buffer, width=250, byid=TRUE)
 
     outbreak_set <- data.frame()
+
+
+    # This sets it to be 1 outbreak per 10000m^2
+
+    if (per_area == TRUE){
+    total_outbreaks <- round(raster::area(outbreak_buffer)/10000, 0)
+    }else{
+      total_outbreaks <- nSim
+    }
+
+
     zz <- 0
-    ## zz is a counter - this sets it to be 1 outbreak per 10000m^2
-    while (zz < round(raster::area(outbreak_buffer)/10000, 0)){
+    ## zz is a counter
+    while (zz < total_outbreaks){
       temp_point <- sp::spsample(outbreak_buffer,
                              n=1,
                              type="random")
