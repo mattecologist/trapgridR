@@ -57,6 +57,7 @@ output <- rbind(output, run.df)
 }
 
 ggplot (output, aes(x=Day, y=1-meanEscape, colour=RunID))+
-  geom_line()
+  geom_line()+
+  ggtitle("Sim Outputs")
 
 
