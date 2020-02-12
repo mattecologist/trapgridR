@@ -3,16 +3,20 @@
 library (tidyverse)
 
 traps.arrange <- c("random")
-flies.num <- c(1, 10, 50, 100, 1000)
+flies.num <- c(1, 2, 3, 4, 5)
 outbreak.loc <- c("within", "outside")
+lambda.range <- c(0.001, 0.005, 0.01, 0.05)
 
+sim_params <- expand.grid("traps" = traps.arrange, "flies" = flies.num, "outbreak" = outbreak.loc, "lambda" = lambda.range)
 
-sim_params <- expand.grid("traps" = traps.arrange, "flies" = flies.num, "outbreak" = outbreak.loc)
+sim_params <- cbind("RunID" = as.factor(seq_along(sim_params[,1])), sim_params)
 
 
 
 
 output <- data.frame()
+
+for (x in 1:10){
 
 for (i in 1:nrow(sim_params)){
 
@@ -28,25 +32,27 @@ if (sim_params[i,]$traps == "regular"){
   names (traps) <- c("Latitude", "Longitude")
 
   #Assign a lamba (trap attractiveness)
-  make_actual_grid(gridname="orchard_traps", traps, lambda = 0.005)
+  make_actual_grid(gridname="orchard_traps", traps, lambda = sim_params$lambda[i])
 
   if (sim_params[i,]$outbreak == "outside"){
 
-    outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = FALSE,
+    outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = FALSE, per_area = FALSE,
+                                         nSim=10,
                                          outbreak_name = "outbreaks")
   }
   if (sim_params[i,]$outbreak == "within"){
 
-    outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = TRUE,
+    outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = TRUE, per_area = FALSE,
+                                         nSim=10,
                                          outbreak_name = "outbreaks")
   }
 
 }
 
-model.temp <- trapgridR("orchard_traps", nDays=28, nFlies=sim_params$flies[i], nSim=2, D=10^5, outbreaks = "outbreaks")
+model.temp <- trapgridR("orchard_traps", nDays=14, nFlies=sim_params$flies[i], D=10^5, outbreaks = "outbreaks")
 
 run.df <- model.temp$simRuns %>%
-  group_by(Day)%>%
+  group_by(Day, SimRun)%>%
   summarise(meanEscape = mean(Cumulative.Escape.Probability))%>%
   as.data.frame()
 
@@ -56,8 +62,24 @@ output <- rbind(output, run.df)
 
 }
 
-ggplot (output, aes(x=Day, y=1-meanEscape, colour=RunID))+
-  geom_line()+
+}
+output <- left_join(sim_params, output)
+
+ggplot (output, aes(x=Day, y=1-meanEscape, group=interaction(RunID)))+
+ # geom_line(alpha=0.5)+
+  geom_smooth(aes(colour=RunID),alpha=0.3)+
   ggtitle("Sim Outputs")
+
+
+output2 <- output[output$Day == 14,]
+
+ggplot(output2, aes(x=RunID, y=meanEscape))+geom_boxplot(aes(fill=outbreak))
+
+ggplot(output2, aes(x=RunID, y=1-meanEscape))+
+  geom_boxplot(aes(fill=as.factor(flies)))+
+  facet_wrap(~outbreak*lambda, scales="free_x")
+
+ggplot(output2)+
+  geom_density(aes(meanEscape, fill=as.factor(flies)), alpha=0.5)
 
 
