@@ -1,16 +1,20 @@
 ### Simulations
 
 library (tidyverse)
+library (trapgridR)
+library (ggplot2)
+
+block_size <- 1000 # 10 hectares
 
 traps.arrange <- c("random")
-flies.num <- c(1, 2, 3, 4, 5)
-outbreak.loc <- c("within", "outside")
+flies.num <- c(1, 2, 5, 10, 50)
+outbreak.loc <- c("outside")
 lambda.range <- c(0.001, 0.005, 0.01, 0.05)
+n_traps <- c(1, 10)
 
-sim_params <- expand.grid("traps" = traps.arrange, "flies" = flies.num, "outbreak" = outbreak.loc, "lambda" = lambda.range)
+sim_params <- expand.grid("traps" = traps.arrange, "flies" = flies.num, "outbreak" = outbreak.loc, "lambda" = lambda.range, "n_traps" = n_traps)
 
 sim_params <- cbind("RunID" = as.factor(seq_along(sim_params[,1])), sim_params)
-
 
 
 
@@ -25,8 +29,8 @@ if (sim_params[i,]$traps == "regular"){
   make_regular_grid("my_grid")
 }else{
   traps <- data.frame()
-  for (xx in 1:10){
-    temp <- runif(2, 0, 2000)
+  for (xx in 1:sim_params$n_traps[i]){
+    temp <- runif(2, 0, block_size)
     traps <- rbind(traps, temp)
   }
   names (traps) <- c("Latitude", "Longitude")
@@ -37,13 +41,13 @@ if (sim_params[i,]$traps == "regular"){
   if (sim_params[i,]$outbreak == "outside"){
 
     outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = FALSE, per_area = FALSE,
-                                         nSim=10,
+                                         nSim=sim_params$flies[i], ## is this just making 10 outbreaks and disregarding fly numbers?
                                          outbreak_name = "outbreaks")
   }
   if (sim_params[i,]$outbreak == "within"){
 
     outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = TRUE, per_area = FALSE,
-                                         nSim=10,
+                                         nSim=sim_params$flies[i],
                                          outbreak_name = "outbreaks")
   }
 
@@ -76,8 +80,8 @@ output2 <- output[output$Day == 14,]
 ggplot(output2, aes(x=RunID, y=meanEscape))+geom_boxplot(aes(fill=outbreak))
 
 ggplot(output2, aes(x=RunID, y=1-meanEscape))+
-  geom_boxplot(aes(fill=as.factor(flies)))+
-  facet_wrap(~outbreak*lambda, scales="free_x")
+  geom_boxplot(aes(fill=as.factor(n_traps)))+
+  facet_wrap(~lambda, scales="free_x")
 
 ggplot(output2)+
   geom_density(aes(meanEscape, fill=as.factor(flies)), alpha=0.5)
