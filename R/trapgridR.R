@@ -213,16 +213,18 @@ return(print(paste("Trapping grid ", gridname, "written")))
 #' @param outbreak_name Name of file to write out
 #' @param lambda The trap efficiency
 #' @param per_area Flag to override the num_outbreaks and do it by area
+#' @param orchard_buf Distance around orchard (in metres) that outbreaks cannot occur
 #' @return A trapping grid text file
 #' @export
 
 
 make_outbreak_file <- function (traps=traps,
                                 in_orchard = TRUE,
-                                nSim=10,
+                                nOutbreaks=10,
                                 outbreak_name = "outbreaks",
                                 lambda=0.05,
-                                per_area=FALSE){
+                                per_area=FALSE,
+                                orchard_buf=25){
   # Function to generate an outbreak file
   # TrapGrid: "You may supply an optional Outbreak file, which is a two-column tab-delimited file containing the x and y locations of outbreaks to be simulated."
   x1 <- min(traps[,1]-100)
@@ -236,7 +238,7 @@ make_outbreak_file <- function (traps=traps,
   traps[,2] <- traps[,2] - y1
 
   outbreak_set <- as.data.frame(sp::spsample(sp::SpatialPoints(rbind(cbind(x1, y1), cbind(x2, y2))),
-                                         n=nSim,
+                                         n=nOutbreaks,
                                          type="random"))
 
   outbreak_set[,1] <- outbreak_set[,1] - x1
@@ -250,7 +252,7 @@ make_outbreak_file <- function (traps=traps,
     polyline <- traps[,1:2][hpts, ]
     polytemp <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(polyline)), ID=1)))
 
-    orchard_buffer <- rgeos::gBuffer(polytemp, width=25, byid=TRUE)
+    orchard_buffer <- rgeos::gBuffer(polytemp, width=orchard_buf, byid=TRUE)
     outbreak_buffer <- rgeos::gBuffer(orchard_buffer, width=250, byid=TRUE)
 
     outbreak_set <- data.frame()
@@ -261,7 +263,7 @@ make_outbreak_file <- function (traps=traps,
     if (per_area == TRUE){
     total_outbreaks <- round(raster::area(outbreak_buffer)/10000, 0)
     }else{
-      total_outbreaks <- nSim
+      total_outbreaks <- nOutbreaks
     }
 
 
