@@ -21,20 +21,19 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   rJava::.jaddClassPath(paste0(system.file(package="trapgridR"), "/java/TrapGrid.jar"))
   trapgrid <- rJava::.jnew('com.reallymany.trapgrid.Driver')
 
-  if (!is.null(outbreaks)){
+   if (!is.null(outbreaks)){
     rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
                                                  "-nf", nFlies,
                                                  "-nd", nDays,
-                                                 "-ns", nSim,
                                                  "-dc", D,
                                                  "-ob", outbreaks), returnSig = "V")
-  } else {
-    rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
-                                                 "-nf", nFlies,
+   } else {
+     rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
+                                                  "-nf", nFlies,
                                                  "-nd", nDays,
-                                                 "-ns", nSim,
+                                                  "-ns", nSim,
                                                  "-dc", D), returnSig = "V")
-  }
+   }
 
 
   hold <- scan(paste0("out.txt"), skip=4, blank.lines.skip = TRUE, nlines=nDays)
@@ -224,25 +223,33 @@ make_outbreak_file <- function (traps=traps,
                                 outbreak_name = "outbreaks",
                                 lambda=0.05,
                                 per_area=FALSE,
-                                orchard_buf=25){
+                                orchard_buf=25,
+                                outbreak_buf=250){
   # Function to generate an outbreak file
   # TrapGrid: "You may supply an optional Outbreak file, which is a two-column tab-delimited file containing the x and y locations of outbreaks to be simulated."
-  x1 <- min(traps[,1]-100)
-  x2 <- max(traps[,1]+100)
-  y1 <- min(traps[,2]-100)
-  y2 <- max(traps[,2]+100)
+  # x1 <- min(traps[,1]-100)
+  # x2 <- max(traps[,1]+100)
+  # y1 <- min(traps[,2]-100)
+  # y2 <- max(traps[,2]+100)
+  #
+  # ## ISSUE: trapgrid can't take -ve numbers.... need to apply a correction...
+  # ## apply correction to traps
+  # traps[,1] <- traps[,1] - x1
+  # traps[,2] <- traps[,2] - y1
+  #
+  # outbreak_set <- as.data.frame(sp::spsample(sp::SpatialPoints(rbind(cbind(x1, y1), cbind(x2, y2))),
+  #                                        n=nOutbreaks,
+  #                                        type="random"))
 
-  ## ISSUE: trapgrid can't take -ve numbers.... need to apply a correction...
-  ## apply correction to traps
-  traps[,1] <- traps[,1] - x1
-  traps[,2] <- traps[,2] - y1
+  # outbreak_set[,1] <- outbreak_set[,1] - x1
+  # outbreak_set[,2] <- outbreak_set[,2] - y1
 
-  outbreak_set <- as.data.frame(sp::spsample(sp::SpatialPoints(rbind(cbind(x1, y1), cbind(x2, y2))),
-                                         n=nOutbreaks,
-                                         type="random"))
+  outbreak_set <- as.data.frame(sp::spsample(sp::SpatialPoints(rbind(cbind(min(traps[,1]), min(traps[,2])), cbind(max(traps[,1]), max(traps[,2])))),
+                                          n=nOutbreaks,
+                                          type="random"))
 
-  outbreak_set[,1] <- outbreak_set[,1] - x1
-  outbreak_set[,2] <- outbreak_set[,2] - y1
+   outbreak_set[,1] <- outbreak_set[,1] - min(traps[,1])
+   outbreak_set[,2] <- outbreak_set[,2] - min(traps[,2])
 
   outbreak_set <- round(outbreak_set, 0)
 
@@ -253,7 +260,7 @@ make_outbreak_file <- function (traps=traps,
     polytemp <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(polyline)), ID=1)))
 
     orchard_buffer <- rgeos::gBuffer(polytemp, width=orchard_buf, byid=TRUE)
-    outbreak_buffer <- rgeos::gBuffer(orchard_buffer, width=250, byid=TRUE)
+    outbreak_buffer <- rgeos::gBuffer(orchard_buffer, width=outbreak_buf, byid=TRUE)
 
     outbreak_set <- data.frame()
 
@@ -274,8 +281,14 @@ make_outbreak_file <- function (traps=traps,
                              n=1,
                              type="random")
       if (is.na(sp::over(temp_point, orchard_buffer))){
-        outbreak_set <- rbind(outbreak_set, as.matrix(as.data.frame(temp_point))[,1:2])
-        zz <- zz +1
+         if (temp_point@coords[1] > 0){ # ensure all are positive
+           if (temp_point@coords[2] >0 ){ # ensure all are positive
+             outbreak_set <- rbind(outbreak_set, as.matrix(as.data.frame(temp_point))[,1:2])
+             zz <- zz +1
+           }
+         }
+
+
       }
     }
   }else{
@@ -285,6 +298,16 @@ make_outbreak_file <- function (traps=traps,
 
   traps_sp <- sp::SpatialPoints(traps[,1:2])
   buffer_traps <- rgeos::gBuffer(traps_sp, width=1/lambda)
+
+  # https://github.com/bruab/TrapGrid/blob/master/src/com/reallymany/trapgrid/Outbreak.java
+  # Amazing Outbreak class abstracts a collection of OutbreakLocations. The constructor expects
+  # a tab-separated file containing x, y, n and D values where (x, y) is the location of
+  # an outbreak, n is the number of flies and D is their diffusion coefficient.
+  # @author bhall
+
+  #outbreak_set <- cbind(outbreak_set, rep(nFlies, nrow(outbreak_set)), rep(as.double(D), nrow(outbreak_set)))
+
+  #outbreak_set <- round(outbreak_set, 1)
 
   write.table(outbreak_set, outbreak_name,
               na = "",
