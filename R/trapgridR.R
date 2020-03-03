@@ -21,6 +21,10 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   rJava::.jaddClassPath(paste0(system.file(package="trapgridR"), "/java/TrapGrid.jar"))
   trapgrid <- rJava::.jnew('com.reallymany.trapgrid.Driver')
 
+  if (file.exists(filepath)){
+    print("File exists")
+  }
+
    if (!is.null(outbreaks)){
     rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
                                                  "-nf", nFlies,
@@ -52,6 +56,9 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
     gsub('\\(', "", x)
   }))
 
+  # add number of each fly per rep
+  fly_loc$flynum <- rep(1:nFlies, nDays)
+
   ## Read output for for all individual simulations
   hold <- readLines("out.txt")
   simresults <- grep("Outbreak",hold)
@@ -72,7 +79,15 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   fn1 <- "out.txt"
   if (file.exists(fn1)){file.remove(fn1)}
   fn2 <- "fly.csv"
-  if (file.exists(fn2)){file.remove(fn2)}
+  #if (file.exists(fn2)){file.remove(fn2)}
+
+
+  # add number of reps
+  fly_loc$Simulation.Number <-rep(1:length(unique(simRuns$Outbreak.Location)), each=nFlies*nDays)
+
+  # importantly, convert from factor
+  fly_loc$X <- as.numeric(as.character(fly_loc$X))
+  fly_loc$Y <- as.numeric(as.character(fly_loc$Y))
 
   out_list <- list(simRuns, fly_loc)
   names(out_list) <- c("simRuns", "flyLoc")
