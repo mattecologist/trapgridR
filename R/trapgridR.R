@@ -21,9 +21,6 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   rJava::.jaddClassPath(paste0(system.file(package="trapgridR"), "/java/TrapGrid.jar"))
   trapgrid <- rJava::.jnew('com.reallymany.trapgrid.Driver')
 
-  if (file.exists(filepath)){
-    print("File exists")
-  }
 
    if (!is.null(outbreaks)){
     rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
@@ -128,7 +125,8 @@ write.table(traps, file=paste0(gridname),
             sep = "\t",
             append=TRUE)
 
-return(print(paste("Trapping grid ", gridname, "written")))
+print(paste("Trapping grid ", gridname, "written"))
+return(traps)
 
 }
 
@@ -320,7 +318,7 @@ make_outbreak_file <- function (traps=traps,
   # an outbreak, n is the number of flies and D is their diffusion coefficient.
   # @author bhall
 
-  #outbreak_set <- cbind(outbreak_set, rep(nFlies, nrow(outbreak_set)), rep(as.double(D), nrow(outbreak_set)))
+  #outbreak_set <- cbind(outbreak_set, rep(nFlies, nrow(outbreak_set)), rep(D))
 
   #outbreak_set <- round(outbreak_set, 1)
 
