@@ -11,7 +11,8 @@ make_outbreak_file(
   outbreak_name = "outbreaks",
   lambda = 0.05,
   per_area = FALSE,
-  orchard_buf = 25
+  orchard_buf = 25,
+  outbreak_buf = 250
 )
 }
 \arguments{

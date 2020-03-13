@@ -182,12 +182,13 @@ make_random_grid <- function(n.traps=10,
                   append=TRUE)
       plot (traps[,2]~traps[,1])
 
-      return(message("Trapping grid ", gridname, " written"))}
+      return(traps)
+      message("Trapping grid ", gridname, " written")}
   }
   return(message("Unable to generate this landscape - try making it bigger, or min distance smaller"))
 }
 
-#' Setup actual trapping grid
+  #' Setup actual trapping grid
 #'
 #' @param gridname Name for the trapping grid file to be output
 #' @param gridSize Describes the bottom right corner in metres, from the top left corner which is 0,0
