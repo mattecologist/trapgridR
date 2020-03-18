@@ -184,7 +184,7 @@ for (x in 1:100){
 
 }
 
-output <- left_join(sim_params, output)
+  output <- left_join(sim_params, output)
 
 
 
@@ -208,6 +208,8 @@ ggplot(output2, aes(x=traps, y=1-meanEscape))+
   ggtitle("After 7 Days")+
   theme_dark()
 
+ggsave(filename="set1_7.png")
+
 output2 <- output[output$Day == 14,]
 
 ggplot(output2, aes(x=traps, y=1-meanEscape))+
@@ -218,22 +220,30 @@ ggplot(output2, aes(x=traps, y=1-meanEscape))+
   ggtitle("After 14 Days")+
   theme_dark()
 
+ggsave(filename="set1_14.png")
 
 ## Set 2 number of traps
 output2 <- output[output$Day == 7,]
 
 ggplot(output2, aes(x=as.factor(n_traps), y=1-meanEscape))+
   geom_boxplot(aes(fill=as.factor(n_traps)))+
+  ggsci::scale_fill_jco()+
   xlab("Number of Traps")+
-  ggtitle("After 7 Days")
+  ggtitle("After 7 Days")+
+  theme_dark()
+
+ggsave(filename="set2_7.png")
 
 output2 <- output[output$Day == 14,]
 
 ggplot(output2, aes(x=as.factor(n_traps), y=1-meanEscape))+
   geom_boxplot(aes(fill=as.factor(n_traps)))+
+  ggsci::scale_fill_jco()+
   xlab("Number of Traps")+
-  ggtitle("After 14 Days")
+  ggtitle("After 14 Days")+
+  theme_dark()
 
+ggsave(filename="set2_14.png")
 
 
 ## Set 3 number of flies
@@ -241,17 +251,23 @@ output2 <- output[output$Day == 7,]
 
 ggplot(output2, aes(x=as.factor(flies), y=1-meanEscape, fill=as.factor(flies)))+
   geom_boxplot()+
+  ggsci::scale_fill_jco()+
   xlab("Number of Flies")+
-  ggtitle("After 7 Days")
+  ggtitle("After 7 Days")+
+  theme_dark()
+
+ggsave(filename="set3_7.png")
 
 output2 <- output[output$Day == 14,]
 
 ggplot(output2, aes(x=as.factor(flies), y=1-meanEscape, fill=as.factor(flies)))+
   geom_boxplot()+
+  ggsci::scale_fill_jco()+
   xlab("Number of Flies")+
-  ggtitle("After 14 Days")
+  ggtitle("After 14 Days")+
+  theme_dark()
 
-
+ggsave(filename="set3_14.png")
 
 
 
