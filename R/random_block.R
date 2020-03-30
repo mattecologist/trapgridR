@@ -1,8 +1,24 @@
+#' Create random blocks and traps
+#'
+#' @param n.traps How many traps to place in block
+#' @param n.sides Shape of the block, how many sides (3+)
+#' @param block.size Area of the block in metres squared
+#' @param regular.block Force block to have evenly sized and angled edges (e.g. regular shape)
+#' @param regular.traps Place traps in a regular pattern through block
+#' @param min.dist Minimum distance between all traps
+#' @param longest.edge Identift the longest edge of the block and place a trap in the middle of it
+#' @author Matt Hill
+#' @return A trapping grid text file
+#' @export
 
 
-make_random_block <- function (n.traps=4, n.sides=4, block.size=100000,
-                               regular.block = F, regular.traps =F,
-                               min.dist=100, longest.edge=T){
+make_random_block <- function (n.traps=4,
+                               n.sides=4,
+                               block.size=100000,
+                               regular.block = F,
+                               regular.traps =F,
+                               min.dist=100,
+                               longest.edge=T){
 
 
   regular.poly <- function(nSides, area) # https://stackoverflow.com/questions/4859482/how-to-generate-random-shapes-given-a-specified-area-r-language
@@ -59,7 +75,7 @@ poly1 <- mapview::coords2Polygons(as.matrix(as.data.frame(p)), ID="test")
 
 ## need to rescale to 0, 0
 
-poly1 <- maptools::elide(poly1, shift=c(0-extent(poly1)[1], 0-extent(poly1)[3]))
+poly1 <- maptools::elide(poly1, shift=c(0-raster::extent(poly1)[1], 0-raster::extent(poly1)[3]))
 
 p <- poly1@polygons[[1]]@Polygons[[1]]@coords
 
@@ -79,16 +95,17 @@ for(rowNum in 2:dim(p)[1]) {
 
 z1 <- p[paste(which.max(distToPrev)-1):paste(which.max(distToPrev)),]
 
-zz <- SpatialPoints(rbind(cbind(sum(z1[,1])/2, sum(z1[,2])/2)))
+zz <- sp::SpatialPoints(rbind(cbind(sum(z1[,1])/2, sum(z1[,2])/2)))
 
-}else{
-  zz <- gCentroid(poly1)
+}
+if (longest.edge == FALSE){
+  zz <- rgeos::gCentroid(poly1)
 }
 
 ## this is just to hold the value of the sides
 block_size = sqrt(block.size)
 
-r <- raster::raster(ncols=round(block_size, 0), nrows=round(block_size, 0), crs=NULL, ext=extent(poly1))
+r <- raster::raster(ncols=round(block_size, 0), nrows=round(block_size, 0), crs=NULL, ext=raster::extent(poly1))
 r1 <- raster::rasterize(poly1, r, 1)
 
 D <- raster:: distanceFromPoints(object = r1, xy = zz)
@@ -107,18 +124,22 @@ while (counter < 1000 & halt < 1 ){
     if (n.traps == 1){
       all.pts <- zz@coords
     }else{
-      rand.pts <- sampleRandom(D, n.traps-1, xy=TRUE)[,1:2]
+      rand.pts <- raster::sampleRandom(D, n.traps-1, xy=TRUE)[,1:2]
       all.pts <- rbind(rand.pts, zz@coords)
     }
   }
 
   if (longest.edge == F){
-      all.pts <- sampleRandom(D, n.traps, xy=TRUE)[,1:2]
+    if (n.traps == 1){
+      all.pts <- rbind(raster::sampleRandom(D, 1, xy=TRUE)[,1:2])
+    }else{
+      all.pts <- raster::sampleRandom(D, n.traps, xy=TRUE)[,1:2]
+    }
   }
 
 
   if (regular.traps == T){
-    all.pts <- spsample(poly1, n.traps, type="regular") ## need to get this to adhere to cellsize
+    all.pts <- sp::spsample(poly1, n.traps, type="regular") ## need to get this to adhere to cellsize
     all.pts <- all.pts@coords
   }
 
@@ -136,7 +157,7 @@ while (counter < 1000 & halt < 1 ){
 
 if (counter < 1000){
 
-plot (D)
+raster::plot (D)
 plot (poly1, add=T)
 points (all.pts, pch=20)
 
@@ -144,3 +165,77 @@ return (list(all.pts, poly1))}else{
   return(message("We tried 1000 times, but min.dist is too large..."))
 }
 }
+
+
+#' Setup outbreak file from random blocks
+#'
+#' @param traps The two-column trap coordinates
+#' @param block The polygon of the orchard/block boundary
+#' @param in_orchard True/False flag for whether flies emerge from within OR outside orchard/block
+#' @param nOutbreaks Number of outbreak locations
+#' @param outbreak_name Name of file to write out
+#' @param orchard_buf Distance around orchard (in metres) that outbreaks cannot occur
+#' @author Matt Hill
+#' @return A trapping grid text file
+#' @export
+
+
+make_block_outbreak <- function (traps=traps,
+                                 block=block,
+                                 in_orchard = FALSE,
+                                 nOutbreaks=10,
+                                 outbreak_name = "outbreaks",
+                                 orchard_buf=25,
+                                 outbreak_buf=250){
+  # Function to generate an outbreak file
+  # TrapGrid: "You may supply an optional Outbreak file, which is a two-column tab-delimited file containing the x and y locations of outbreaks to be simulated."
+
+  # Within block is simple.
+
+  if (in_orchard == TRUE){
+
+    outbreak_set <- as.data.frame(sp::spsample(block,
+                                               n=nOutbreaks,
+                                               type="random"))
+
+  }
+
+  if (in_orchard == FALSE){
+
+    orchard_buffer <- rgeos::gBuffer(block, width=orchard_buf, byid=TRUE)
+    outbreak_buffer <- rgeos::gBuffer(block, width=outbreak_buf, byid=TRUE)
+
+
+    if (orchard_buf < outbreak_buf){
+      donut_buff <- rgeos::gDifference(outbreak_buffer, orchard_buffer)
+
+      outbreak_set <- as.data.frame(sp::spsample(donut_buff,
+                                                 n=nOutbreaks,
+                                                 type="random"))
+
+      plot (donut_buff)
+      points (traps, pch=20)
+      points (outbreak_set)}else{
+        return(message("Outbreak buffer cannot be smaller than orchard buffer"))
+
+      }
+
+  }
+
+  write.table(outbreak_set, outbreak_name,
+              na = "",
+              row.names = FALSE,
+              col.names = FALSE,
+              sep = "\t",
+              append=FALSE)
+
+  traps_sp <- SpatialPoints(traps)
+
+  print(paste("Outbreak file", outbreak_name, "written"))
+
+  return(list("outbreak_set"=outbreak_set, "traps_sp"=traps_sp,
+              "buffer_region"=outbreak_buffer,
+              "block"=block))
+}
+
+

@@ -4,12 +4,8 @@
 \alias{make_regular_grid}
 \title{Setup regular trapping grid}
 \usage{
-make_regular_grid(
-  gridname = "footest",
-  gridSize = c(364, 572),
-  gridSpace = 80,
-  lambda = 0.02
-)
+make_regular_grid(gridname = "footest", gridSize = c(364, 572),
+  gridSpace = 80, lambda = 0.02)
 }
 \arguments{
 \item{gridname}{Name for the trapping grid file to be output}
