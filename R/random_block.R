@@ -18,7 +18,7 @@ make_random_block <- function (n.traps=4,
                                regular.block = F,
                                regular.traps =F,
                                min.dist=100,
-                               longest.edge=T){
+                               longest.edge=F){
 
 
   regular.poly <- function(nSides, area) # https://stackoverflow.com/questions/4859482/how-to-generate-random-shapes-given-a-specified-area-r-language
@@ -139,8 +139,36 @@ while (counter < 1000 & halt < 1 ){
 
 
   if (regular.traps == T){
-    all.pts <- sp::spsample(poly1, n.traps, type="regular") ## need to get this to adhere to cellsize
+    #all.pts <- sp::spsample(poly1, n.traps, type="regular") ## need to get this to adhere to cellsize
+
+    flexible.size <- 100
+
+    all.pts <- sp::makegrid(poly1, n.traps, cellsize = flexible.size)
+
+    marker1 <- length (all.pts[,1])
+
+    while ( marker1 > n.traps){
+      all.pts <- sp::makegrid(poly1, n.traps, cellsize = flexible.size)
+      all.pts <- SpatialPoints(all.pts)
+      all.pts <- rgeos::gIntersection(all.pts, poly1)
+      plot (poly1)
+      points (all.pts)
+      flexible.size <- flexible.size * 1.01
+      marker1 <- length (all.pts)
+    }
+
+
+
     all.pts <- all.pts@coords
+    row.names(all.pts) <- seq_along(all.pts[,1])
+
+
+
+
+    #all.pts@coords <- all.pts@coords[sample(nrow(all.pts@coords), n.traps), ]
+
+    plot (poly1)
+    points (all.pts)
   }
 
 
@@ -158,7 +186,7 @@ while (counter < 1000 & halt < 1 ){
 if (counter < 1000){
 
 raster::plot (D)
-plot (poly1, add=T)
+raster::plot (poly1, add=T)
 points (all.pts, pch=20)
 
 return (list(all.pts, poly1))}else{
@@ -190,6 +218,7 @@ make_block_outbreak <- function (traps=traps,
   # Function to generate an outbreak file
   # TrapGrid: "You may supply an optional Outbreak file, which is a two-column tab-delimited file containing the x and y locations of outbreaks to be simulated."
 
+  donut_buff <- block
   # Within block is simple.
 
   if (in_orchard == TRUE){
@@ -197,6 +226,16 @@ make_block_outbreak <- function (traps=traps,
     outbreak_set <- as.data.frame(sp::spsample(block,
                                                n=nOutbreaks,
                                                type="random"))
+
+    traps_sp <- SpatialPoints(traps)
+
+    plot (block)
+    axis(1)
+    axis(2)
+    points (traps_sp, pch=20)
+    points (outbreak_set)
+
+
 
   }
 
@@ -209,18 +248,31 @@ make_block_outbreak <- function (traps=traps,
     if (orchard_buf < outbreak_buf){
       donut_buff <- rgeos::gDifference(outbreak_buffer, orchard_buffer)
 
-      outbreak_set <- as.data.frame(sp::spsample(donut_buff,
-                                                 n=nOutbreaks,
-                                                 type="random"))
+      donut_buff <- maptools::elide(donut_buff, shift=c(0-raster::extent(donut_buff)[1], 0-raster::extent(donut_buff)[3]))
+
+
+      outbreak_set <- sp::spsample(donut_buff,n=nOutbreaks,type="random")
+
+
+
+      traps_sp <- SpatialPoints(traps)
+      traps_sp <- maptools::elide(traps_sp, shift=apply(bbox(donut_buff), 1, mean)/2)
+
+
+      outbreak_set <- as.data.frame(outbreak_set)
 
       plot (donut_buff)
-      points (traps, pch=20)
+      axis(1)
+      axis(2)
+      points (traps_sp, pch=20)
       points (outbreak_set)}else{
         return(message("Outbreak buffer cannot be smaller than orchard buffer"))
 
       }
 
   }
+
+
 
   write.table(outbreak_set, outbreak_name,
               na = "",
@@ -229,13 +281,52 @@ make_block_outbreak <- function (traps=traps,
               sep = "\t",
               append=FALSE)
 
-  traps_sp <- SpatialPoints(traps)
+
 
   print(paste("Outbreak file", outbreak_name, "written"))
 
-  return(list("outbreak_set"=outbreak_set, "traps_sp"=traps_sp,
-              "buffer_region"=outbreak_buffer,
+  return(list("outbreak_set"=outbreak_set,
+              "traps_sp"=traps_sp,
+              "buffer_region"=donut_buff,
               "block"=block))
+
+  ## need to return some parameters here to reset the position of the trapping grid prior
+  ## to using make_actual_grid (gridSize in particular)
 }
 
+
+#' Setup actual trapping grid
+#'
+#' @param gridname Name for the trapping grid file to be output
+#' @param gridSize Describes the bottom right corner in metres, from the top left corner which is 0,0
+#' @param gridSpace The distance between regularly spaced traps
+#' @param lambda The trap efficiency
+#' @return A trapping grid text file
+#' @export
+
+make_block_grid <- function(gridname="footest",
+                             traps=traps,
+                             outbreak=outbreak,
+                             lambda=0.005){
+
+  traps <- cbind(as.data.frame(traps), lambda=rep(lambda, length(as.data.frame(traps)[,1])))
+
+  gridSize <- extent(outbreak)[c(2,4)]
+
+  #gridSize <- c(max(traps[,"Latitude"]) , max(traps[,"Longitude"]))
+
+
+  gridSize <- round(gridSize, 0)
+
+  cat(paste(gridSize), sep="\t", file=gridname)
+  cat("\n", paste(""), file=gridname, append=TRUE)
+  write.table(traps, file=gridname,
+              na = "",
+              row.names = FALSE,
+              col.names = FALSE,
+              sep = "\t",
+              append=TRUE)
+
+  return(print(paste("Trapping grid ", gridname, "written")))
+}
 

@@ -188,7 +188,7 @@ make_random_grid <- function(n.traps=10,
   return(message("Unable to generate this landscape - try making it bigger, or min distance smaller"))
 }
 
-  #' Setup actual trapping grid
+#' Setup actual trapping grid
 #'
 #' @param gridname Name for the trapping grid file to be output
 #' @param gridSize Describes the bottom right corner in metres, from the top left corner which is 0,0
@@ -199,11 +199,13 @@ make_random_grid <- function(n.traps=10,
 
 make_actual_grid <- function(gridname="footest",
                              traps=traps,
-                            lambda=0.005){
+                             lambda=0.005){
 
 traps <- cbind(traps, lambda=rep(lambda, length(traps[,1])))
 
 gridSize <- c(max(traps[,"Latitude"]) , max(traps[,"Longitude"]))
+
+
 gridSize <- round(gridSize, 0)
 
 cat(paste(gridSize), sep="\t", file=gridname)

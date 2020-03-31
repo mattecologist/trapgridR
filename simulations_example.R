@@ -117,7 +117,7 @@ for (x in 1:100){
     }
   }
 
-  outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = FALSE, per_area = FALSE,
+  outbreaks.data <- make_outbreak_file(traps=traps, in_orchard = FALSE, #per_area = FALSE,
                                        nOutbreaks =1,
                                        outbreak_name = "outbreaks",
                                        orchard_buf = sim_params$away_from_orch[i])

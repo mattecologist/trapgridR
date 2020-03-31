@@ -6,7 +6,7 @@
 \usage{
 make_random_block(n.traps = 4, n.sides = 4, block.size = 1e+05,
   regular.block = F, regular.traps = F, min.dist = 100,
-  longest.edge = T)
+  longest.edge = F)
 }
 \arguments{
 \item{n.traps}{How many traps to place in block}
