@@ -1,24 +1,16 @@
-#' Create random blocks and traps
+#' Create random and regular blocks
 #'
-#' @param n.traps How many traps to place in block
 #' @param n.sides Shape of the block, how many sides (3+)
 #' @param block.size Area of the block in metres squared
 #' @param regular.block Force block to have evenly sized and angled edges (e.g. regular shape)
-#' @param regular.traps Place traps in a regular pattern through block
-#' @param min.dist Minimum distance between all traps
-#' @param longest.edge Identift the longest edge of the block and place a trap in the middle of it
 #' @author Matt Hill
-#' @return A trapping grid text file
+#' @return A SpatialPolygon of specified size and shape
 #' @export
 
 
-make_random_block <- function (n.traps=4,
-                               n.sides=4,
+make_random_block <- function (n.sides=4,
                                block.size=100000,
-                               regular.block = F,
-                               regular.traps =F,
-                               min.dist=100,
-                               longest.edge=F){
+                               regular.block = F){
 
 
   regular.poly <- function(nSides, area) # https://stackoverflow.com/questions/4859482/how-to-generate-random-shapes-given-a-specified-area-r-language
@@ -61,137 +53,185 @@ make_random_block <- function (n.traps=4,
     return (points)
   }
 
-if (regular.block == T){
-  p <- as.data.frame(regular.poly(n.sides, block.size))
-} else{
+  if (regular.block == T){
+    p <- as.data.frame(regular.poly(n.sides, block.size))
+  } else{
 
-  p <- as.data.frame(convex.poly(n.sides, block.size))
-}
-
-
-p <- rbind(p, p[1,])
-poly1 <- mapview::coords2Polygons(as.matrix(as.data.frame(p)), ID="test")
-
-
-## need to rescale to 0, 0
-
-poly1 <- maptools::elide(poly1, shift=c(0-raster::extent(poly1)[1], 0-raster::extent(poly1)[3]))
-
-p <- poly1@polygons[[1]]@Polygons[[1]]@coords
-
-
-
-if (longest.edge == TRUE){
-
-## this bit is from taRifx.geos::cumDist
-
-prevCoords = p[1:dim(p)[1]-1,]
-currCoords = p[2:dim(p)[1],]
-distToPrev = rep(NA,dim(p)[1])
-
-for(rowNum in 2:dim(p)[1]) {
-  distToPrev[rowNum] = taRifx.geo::simpledist(rbind(prevCoords[(rowNum-1),],currCoords[(rowNum-1),]))
-}
-
-z1 <- p[paste(which.max(distToPrev)-1):paste(which.max(distToPrev)),]
-
-zz <- sp::SpatialPoints(rbind(cbind(sum(z1[,1])/2, sum(z1[,2])/2)))
-
-}
-if (longest.edge == FALSE){
-  zz <- rgeos::gCentroid(poly1)
-}
-
-## this is just to hold the value of the sides
-block_size = sqrt(block.size)
-
-r <- raster::raster(ncols=round(block_size, 0), nrows=round(block_size, 0), crs=NULL, ext=raster::extent(poly1))
-r1 <- raster::rasterize(poly1, r, 1)
-
-D <- raster:: distanceFromPoints(object = r1, xy = zz)
-#     mxd <- which.max(D)
-#
-D <- raster::mask (D, r1)
-#
-counter <- 0
-halt <- 0
-
-
-while (counter < 1000 & halt < 1 ){
-
-
-  if (longest.edge == T){
-    if (n.traps == 1){
-      all.pts <- zz@coords
-    }else{
-      rand.pts <- raster::sampleRandom(D, n.traps-1, xy=TRUE)[,1:2]
-      all.pts <- rbind(rand.pts, zz@coords)
-    }
-  }
-
-  if (longest.edge == F){
-    if (n.traps == 1){
-      all.pts <- rbind(raster::sampleRandom(D, 1, xy=TRUE)[,1:2])
-    }else{
-      all.pts <- raster::sampleRandom(D, n.traps, xy=TRUE)[,1:2]
-    }
+    p <- as.data.frame(convex.poly(n.sides, block.size))
   }
 
 
-  if (regular.traps == T){
-    #all.pts <- sp::spsample(poly1, n.traps, type="regular") ## need to get this to adhere to cellsize
+  p <- rbind(p, p[1,])
+  poly1 <- mapview::coords2Polygons(as.matrix(as.data.frame(p)), ID="test")
 
-    flexible.size <- 100
 
-    all.pts <- sp::makegrid(poly1, n.traps, cellsize = flexible.size)
+  ## need to rescale to 0, 0
 
-    marker1 <- length (all.pts[,1])
 
-    while ( marker1 > n.traps){
-      all.pts <- sp::makegrid(poly1, n.traps, cellsize = flexible.size)
-      all.pts <- SpatialPoints(all.pts)
-      all.pts <- rgeos::gIntersection(all.pts, poly1)
-      plot (poly1)
-      points (all.pts)
-      flexible.size <- flexible.size * 1.01
-      marker1 <- length (all.pts)
+  poly1 <- maptools::elide(poly1, shift=c(0-raster::extent(poly1)[1], 0-raster::extent(poly1)[3]))
+
+  raster::plot (poly1)
+
+  return(poly1)
+}
+
+
+#' Create random and regular traps
+#'
+#' @param block A SpatialPolygon - usually generated using \code{make_random_block()}
+#' @param n.traps How many traps to place in block
+#' @param regular.traps Place traps in a regular pattern through block
+#' @param min.dist Minimum distance between all traps
+#' @param longest.edge Identify the longest edge of the block and place a trap in the middle of it
+#' @param perim Space n traps regularly around the perimeter
+#' @author Matt Hill
+#' @return Trap points, block polygon
+#' @export
+
+make_random_traps <- function (block=block,
+                               n.traps=4,
+                               regular.traps =F,
+                               min.dist=100,
+                               longest.edge=F,
+                               perim = F){
+
+  poly1 <- block
+
+  p <- poly1@polygons[[1]]@Polygons[[1]]@coords
+
+
+
+  if (longest.edge == TRUE){
+
+    ## this bit is from taRifx.geos::cumDist
+
+    prevCoords = p[1:dim(p)[1]-1,]
+    currCoords = p[2:dim(p)[1],]
+    distToPrev = rep(NA,dim(p)[1])
+
+    for(rowNum in 2:dim(p)[1]) {
+      distToPrev[rowNum] = taRifx.geo::simpledist(rbind(prevCoords[(rowNum-1),],currCoords[(rowNum-1),]))
     }
 
+    z1 <- p[paste(which.max(distToPrev)-1):paste(which.max(distToPrev)),]
 
+    zz <- sp::SpatialPoints(rbind(cbind(sum(z1[,1])/2, sum(z1[,2])/2)))
+
+  }
+  if (longest.edge == FALSE){
+    zz <- rgeos::gCentroid(poly1)
+  }
+
+  ## this is just to hold the value of the sides
+  block_size = sqrt(block.size)
+
+  r <- raster::raster(ncols=round(block_size, 0), nrows=round(block_size, 0), crs=NULL, ext=raster::extent(poly1))
+  r1 <- raster::rasterize(poly1, r, 1)
+
+  D <- raster:: distanceFromPoints(object = r1, xy = zz)
+  #     mxd <- which.max(D)
+  #
+  D <- raster::mask (D, r1)
+  #
+  counter <- 0
+  halt <- 0
+
+
+
+  if (perim == F){
+
+    while (counter < 1000 & halt < 1 ){
+
+
+      if (longest.edge == T){
+        if (n.traps == 1){
+          all.pts <- zz@coords
+        }else{
+          rand.pts <- raster::sampleRandom(D, n.traps-1, xy=TRUE)[,1:2]
+          all.pts <- rbind(rand.pts, zz@coords)
+        }
+      }
+
+      if (longest.edge == F){
+        if (n.traps == 1){
+          all.pts <- rbind(raster::sampleRandom(D, 1, xy=TRUE)[,1:2])
+        }else{
+          all.pts <- raster::sampleRandom(D, n.traps, xy=TRUE)[,1:2]
+        }
+      }
+
+
+
+
+      if (regular.traps == T){
+        #all.pts <- sp::spsample(poly1, n.traps, type="regular") ## need to get this to adhere to cellsize
+
+        flexible.size <- 100
+
+        all.pts <- sp::makegrid(poly1, n.traps, cellsize = flexible.size)
+
+        marker1 <- length (all.pts[,1])
+
+        while ( marker1 > n.traps){
+          all.pts <- sp::makegrid(poly1, n.traps, cellsize = flexible.size)
+          all.pts <- SpatialPoints(all.pts)
+          all.pts <- rgeos::gIntersection(all.pts, poly1)
+          plot (poly1)
+          points (all.pts)
+          flexible.size <- flexible.size * 1.01
+          marker1 <- length (all.pts)
+        }
+
+
+
+        all.pts <- all.pts@coords
+        row.names(all.pts) <- seq_along(all.pts[,1])
+
+
+
+
+        #all.pts@coords <- all.pts@coords[sample(nrow(all.pts@coords), n.traps), ]
+
+        plot (poly1)
+        points (all.pts)
+      }
+
+
+      if (n.traps != 1){
+
+        if (min(dist(all.pts) > min.dist, na.rm=T)){
+          halt <- halt + 1
+        }
+      }else{
+        halt <- halt + 1
+      }
+      counter <- sum(counter, 1)
+    }
+
+    if (counter < 1000){
+
+      raster::plot (D)
+      raster::plot (poly1, add=T)
+      points (all.pts, pch=20)
+
+      return (list(all.pts, poly1))}else{
+        return(message("We tried 1000 times, but min.dist is too large..."))
+      }
+  }
+
+  if (perim == T){
+    k <- as(poly1, "SpatialLines")
+    all.pts <- spsample(k, n.traps, type="regular")
 
     all.pts <- all.pts@coords
     row.names(all.pts) <- seq_along(all.pts[,1])
 
+    raster::plot (D)
+    raster::plot (poly1, add=T)
+    points (all.pts, pch=20)
 
-
-
-    #all.pts@coords <- all.pts@coords[sample(nrow(all.pts@coords), n.traps), ]
-
-    plot (poly1)
-    points (all.pts)
+    return (list(all.pts, poly1, D))
   }
-
-
-  if (n.traps != 1){
-
-    if (min(dist(all.pts) > min.dist, na.rm=T)){
-      halt <- halt + 1
-    }
-  }else{
-    halt <- halt + 1
-  }
-  counter <- sum(counter, 1)
-}
-
-if (counter < 1000){
-
-raster::plot (D)
-raster::plot (poly1, add=T)
-points (all.pts, pch=20)
-
-return (list(all.pts, poly1))}else{
-  return(message("We tried 1000 times, but min.dist is too large..."))
-}
 }
 
 
@@ -246,19 +286,22 @@ make_block_outbreak <- function (traps=traps,
 
 
     if (orchard_buf < outbreak_buf){
+
+      # create the buffer around the block, and lets call it a donut
       donut_buff <- rgeos::gDifference(outbreak_buffer, orchard_buffer)
 
-      donut_buff <- maptools::elide(donut_buff, shift=c(0-raster::extent(donut_buff)[1], 0-raster::extent(donut_buff)[3]))
+      #take the traps object, convert to spatial and give same extent as the donut
+      traps_sp <- SpatialPoints(traps)
+      traps_sp@bbox <- as.matrix(extent(donut_buff))
 
+      #now shift these so that the bottom left corner is 0, 0
+      donut_buff <- maptools::elide(donut_buff, shift=c(0-raster::extent(donut_buff)[1], 0-raster::extent(donut_buff)[3]))
+      traps_sp <- maptools::elide(traps_sp, shift=c(0-raster::extent(traps_sp)[1], 0-raster::extent(traps_sp)[3]))
+
+
+      # Now can generate the outbreak points
 
       outbreak_set <- sp::spsample(donut_buff,n=nOutbreaks,type="random")
-
-
-
-      traps_sp <- SpatialPoints(traps)
-      traps_sp <- maptools::elide(traps_sp, shift=apply(bbox(donut_buff), 1, mean)/2)
-
-
       outbreak_set <- as.data.frame(outbreak_set)
 
       plot (donut_buff)

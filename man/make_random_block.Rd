@@ -2,32 +2,22 @@
 % Please edit documentation in R/random_block.R
 \name{make_random_block}
 \alias{make_random_block}
-\title{Create random blocks and traps}
+\title{Create random and regular blocks}
 \usage{
-make_random_block(n.traps = 4, n.sides = 4, block.size = 1e+05,
-  regular.block = F, regular.traps = F, min.dist = 100,
-  longest.edge = F)
+make_random_block(n.sides = 4, block.size = 1e+05, regular.block = F)
 }
 \arguments{
-\item{n.traps}{How many traps to place in block}
-
 \item{n.sides}{Shape of the block, how many sides (3+)}
 
 \item{block.size}{Area of the block in metres squared}
 
 \item{regular.block}{Force block to have evenly sized and angled edges (e.g. regular shape)}
-
-\item{regular.traps}{Place traps in a regular pattern through block}
-
-\item{min.dist}{Minimum distance between all traps}
-
-\item{longest.edge}{Identift the longest edge of the block and place a trap in the middle of it}
 }
 \value{
-A trapping grid text file
+A SpatialPolygon of specified size and shape
 }
 \description{
-Create random blocks and traps
+Create random and regular blocks
 }
 \author{
 Matt Hill
