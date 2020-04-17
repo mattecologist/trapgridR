@@ -4,8 +4,8 @@
 \alias{make_random_traps}
 \title{Create random and regular traps}
 \usage{
-make_random_traps(block = block, n.traps = 4, regular.traps = F,
-  min.dist = 100, longest.edge = F, perim = F)
+make_random_traps(block = block, block.size = 1e+05, n.traps = 4,
+  regular.traps = F, min.dist = 100, longest.edge = F, perim = F)
 }
 \arguments{
 \item{block}{A SpatialPolygon - usually generated using \code{make_random_block()}}

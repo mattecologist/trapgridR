@@ -89,6 +89,7 @@ make_random_block <- function (n.sides=4,
 #' @export
 
 make_random_traps <- function (block=block,
+                               block.size=100000,
                                n.traps=4,
                                regular.traps =F,
                                min.dist=100,
