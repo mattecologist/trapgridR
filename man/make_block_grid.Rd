@@ -4,8 +4,12 @@
 \alias{make_block_grid}
 \title{Setup actual trapping grid}
 \usage{
-make_block_grid(gridname = "footest", traps = traps,
-  outbreak = outbreak, lambda = 0.005)
+make_block_grid(
+  gridname = "footest",
+  traps = traps,
+  outbreak = outbreak,
+  lambda = 0.005
+)
 }
 \arguments{
 \item{gridname}{Name for the trapping grid file to be output}

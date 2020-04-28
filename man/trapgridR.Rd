@@ -4,9 +4,14 @@
 \alias{trapgridR}
 \title{Retrieve a Java instance of TrapGrid.}
 \usage{
-trapgridR(filepath = paste0(system.file(package = "trapgridR"),
-  "/java/foogrid"), nDays = 14, nFlies = 100, nSim = 10, D = 10^5,
-  outbreaks = NULL)
+trapgridR(
+  filepath = paste0(system.file(package = "trapgridR"), "/java/foogrid"),
+  nDays = 14,
+  nFlies = 100,
+  nSim = 10,
+  D = 10^5,
+  outbreaks = NULL
+)
 }
 \arguments{
 \item{filepath}{Path of the trapping grid file}

@@ -4,9 +4,15 @@
 \alias{make_block_outbreak}
 \title{Setup outbreak file from random blocks}
 \usage{
-make_block_outbreak(traps = traps, block = block, in_orchard = FALSE,
-  nOutbreaks = 10, outbreak_name = "outbreaks", orchard_buf = 25,
-  outbreak_buf = 250)
+make_block_outbreak(
+  traps = traps,
+  block = block,
+  in_orchard = FALSE,
+  nOutbreaks = 10,
+  outbreak_name = "outbreaks",
+  orchard_buf = 25,
+  outbreak_buf = 250
+)
 }
 \arguments{
 \item{traps}{The two-column trap coordinates}

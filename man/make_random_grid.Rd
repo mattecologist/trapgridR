@@ -4,9 +4,16 @@
 \alias{make_random_grid}
 \title{Setup random trapping grid}
 \usage{
-make_random_grid(n.traps = 10, x1 = 2000, y1 = 2000, d = 400,
-  trials = 1000, perim = FALSE, gridname = "footest",
-  lambda = 0.02)
+make_random_grid(
+  n.traps = 10,
+  x1 = 2000,
+  y1 = 2000,
+  d = 400,
+  trials = 1000,
+  perim = FALSE,
+  gridname = "footest",
+  lambda = 0.02
+)
 }
 \arguments{
 \item{n.traps}{Number of random traps}
