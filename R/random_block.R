@@ -235,6 +235,40 @@ make_random_traps <- function (block=block,
   }
 }
 
+#' Setup actual trapping grid
+#'
+#' @param gridname Name for the trapping grid file to be output
+#' @param gridSize Describes the bottom right corner in metres, from the top left corner which is 0,0
+#' @param gridSpace The distance between regularly spaced traps
+#' @param lambda The trap efficiency
+#' @return A trapping grid text file
+#' @export
+
+make_block_grid <- function(gridname="footest",
+                             traps=traps,
+                             outbreak=outbreak,
+                             lambda=0.005){
+
+  traps <- cbind(as.data.frame(traps), lambda=rep(lambda, length(as.data.frame(traps)[,1])))
+
+  gridSize <- extent(outbreak)[c(2,4)]
+
+  #gridSize <- c(max(traps[,"Latitude"]) , max(traps[,"Longitude"]))
+
+
+  gridSize <- round(gridSize, 0)
+
+  cat(paste(gridSize), sep="\t", file=gridname)
+  cat("\n", paste(""), file=gridname, append=TRUE)
+  write.table(traps, file=gridname,
+              na = "",
+              row.names = FALSE,
+              col.names = FALSE,
+              sep = "\t",
+              append=TRUE)
+
+  return(print(paste("Trapping grid ", gridname, "written")))
+}
 
 #' Setup outbreak file from random blocks
 #'
@@ -247,7 +281,6 @@ make_random_traps <- function (block=block,
 #' @author Matt Hill
 #' @return A trapping grid text file
 #' @export
-
 
 make_block_outbreak <- function (traps=traps,
                                  block=block,
@@ -336,41 +369,5 @@ make_block_outbreak <- function (traps=traps,
 
   ## need to return some parameters here to reset the position of the trapping grid prior
   ## to using make_actual_grid (gridSize in particular)
-}
-
-
-#' Setup actual trapping grid
-#'
-#' @param gridname Name for the trapping grid file to be output
-#' @param gridSize Describes the bottom right corner in metres, from the top left corner which is 0,0
-#' @param gridSpace The distance between regularly spaced traps
-#' @param lambda The trap efficiency
-#' @return A trapping grid text file
-#' @export
-
-make_block_grid <- function(gridname="footest",
-                             traps=traps,
-                             outbreak=outbreak,
-                             lambda=0.005){
-
-  traps <- cbind(as.data.frame(traps), lambda=rep(lambda, length(as.data.frame(traps)[,1])))
-
-  gridSize <- extent(outbreak)[c(2,4)]
-
-  #gridSize <- c(max(traps[,"Latitude"]) , max(traps[,"Longitude"]))
-
-
-  gridSize <- round(gridSize, 0)
-
-  cat(paste(gridSize), sep="\t", file=gridname)
-  cat("\n", paste(""), file=gridname, append=TRUE)
-  write.table(traps, file=gridname,
-              na = "",
-              row.names = FALSE,
-              col.names = FALSE,
-              sep = "\t",
-              append=TRUE)
-
-  return(print(paste("Trapping grid ", gridname, "written")))
 }
 
