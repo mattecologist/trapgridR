@@ -79,6 +79,7 @@ model2 <- trapgridR("orchard_traps", nDays=28, nFlies=5, nSim=10, D=10^5, outbre
 ```
 
 ```{r}
+library (tidyverse)
 outbreaks <- tidyr::separate(model2$simRuns, Outbreak.Location, into=c("X", "Y"), sep=",")[,c("X", "Y")]
 outbreaks <- outbreaks[complete.cases(outbreaks),]
 outbreaks$X <- as.numeric(gsub("\\(|\\)", "", outbreaks$X))

@@ -17,6 +17,8 @@ make_random_traps(
 \arguments{
 \item{block}{A SpatialPolygon - usually generated using \code{make_random_block()}}
 
+\item{block.size}{Size of the block in metres squared}
+
 \item{n.traps}{How many traps to place in block}
 
 \item{regular.traps}{Place traps in a regular pattern through block}

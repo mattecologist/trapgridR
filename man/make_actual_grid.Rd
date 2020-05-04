@@ -9,11 +9,9 @@ make_actual_grid(gridname = "footest", traps = traps, lambda = 0.005)
 \arguments{
 \item{gridname}{Name for the trapping grid file to be output}
 
+\item{traps}{Trap coordinates}
+
 \item{lambda}{The trap efficiency}
-
-\item{gridSize}{Describes the bottom right corner in metres, from the top left corner which is 0,0}
-
-\item{gridSpace}{The distance between regularly spaced traps}
 }
 \value{
 A trapping grid text file

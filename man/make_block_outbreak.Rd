@@ -26,6 +26,8 @@ make_block_outbreak(
 \item{outbreak_name}{Name of file to write out}
 
 \item{orchard_buf}{Distance around orchard (in metres) that outbreaks cannot occur}
+
+\item{outbreak_buf}{Distance from orchard in which outbreaks can occur}
 }
 \value{
 A trapping grid text file

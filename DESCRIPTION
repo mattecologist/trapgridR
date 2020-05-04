@@ -17,4 +17,6 @@ VignetteBuilder: knitr
 Imports: 
     raster,
     rgeos,
-    sp
+    sp,
+    maptools,
+    mapview

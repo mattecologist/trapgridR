@@ -79,6 +79,7 @@ make_random_block <- function (n.sides=4,
 #' Create random and regular traps
 #'
 #' @param block A SpatialPolygon - usually generated using \code{make_random_block()}
+#' @param block.size Size of the block in metres squared
 #' @param n.traps How many traps to place in block
 #' @param regular.traps Place traps in a regular pattern through block
 #' @param min.dist Minimum distance between all traps
@@ -235,18 +236,16 @@ make_random_traps <- function (block=block,
   }
 }
 
-#' Setup actual trapping grid
+#' Write out traps from a block as a trapgrid file
 #'
 #' @param gridname Name for the trapping grid file to be output
-#' @param gridSize Describes the bottom right corner in metres, from the top left corner which is 0,0
-#' @param gridSpace The distance between regularly spaced traps
+#' @param traps Coordinates of traps
 #' @param lambda The trap efficiency
 #' @return A trapping grid text file
 #' @export
 
 make_block_grid <- function(gridname="footest",
                              traps=traps,
-                             outbreak=outbreak,
                              lambda=0.005){
 
   traps <- cbind(as.data.frame(traps), lambda=rep(lambda, length(as.data.frame(traps)[,1])))
@@ -277,6 +276,7 @@ make_block_grid <- function(gridname="footest",
 #' @param in_orchard True/False flag for whether flies emerge from within OR outside orchard/block
 #' @param nOutbreaks Number of outbreak locations
 #' @param outbreak_name Name of file to write out
+#' @param outbreak_buf Distance from orchard in which outbreaks can occur
 #' @param orchard_buf Distance around orchard (in metres) that outbreaks cannot occur
 #' @author Matt Hill
 #' @return A trapping grid text file

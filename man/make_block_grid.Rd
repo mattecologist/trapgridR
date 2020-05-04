@@ -2,27 +2,20 @@
 % Please edit documentation in R/random_block.R
 \name{make_block_grid}
 \alias{make_block_grid}
-\title{Setup actual trapping grid}
+\title{Write out traps from a block as a trapgrid file}
 \usage{
-make_block_grid(
-  gridname = "footest",
-  traps = traps,
-  outbreak = outbreak,
-  lambda = 0.005
-)
+make_block_grid(gridname = "footest", traps = traps, lambda = 0.005)
 }
 \arguments{
 \item{gridname}{Name for the trapping grid file to be output}
 
+\item{traps}{Coordinates of traps}
+
 \item{lambda}{The trap efficiency}
-
-\item{gridSize}{Describes the bottom right corner in metres, from the top left corner which is 0,0}
-
-\item{gridSpace}{The distance between regularly spaced traps}
 }
 \value{
 A trapping grid text file
 }
 \description{
-Setup actual trapping grid
+Write out traps from a block as a trapgrid file
 }
