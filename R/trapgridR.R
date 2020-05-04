@@ -40,7 +40,7 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   outfile <- data.frame(cbind(hold[seq(1, length(hold), 2)], hold[seq(2, length(hold), 2)]))
   colnames(outfile) <- c("Day",	"Av Cumulative Escape Probability")
 
-  fly_loc <- read.csv("fly.csv", header = FALSE)
+  fly_loc <- utils::read.csv("fly.csv", header = FALSE)
   colnames(fly_loc) <- c("Simulation Number", "Day", "X", "Y")
 
   #Remove closing parenthesis from Y Coord
@@ -117,7 +117,7 @@ plot (traps[,1:2])
 ## Write out the trapping grid file - the second line is a fix to append the table to a new line - the java file can't have a tab space at the end of the first line
 cat(paste(gridSize), sep="\t", file=paste0(gridname))
 cat("\n", paste(""), file=paste0(gridname), append=TRUE)
-write.table(traps, file=paste0(gridname),
+utils::write.table(traps, file=paste0(gridname),
             na = "",
             row.names = FALSE,
             col.names = FALSE,
@@ -157,23 +157,23 @@ make_random_grid <- function(n.traps=10,
   gridSize <- c(x1, y1)
   for(i in 1:trials){
 
-    randos <- cbind(runif(n.traps,0,x1),runif(n.traps,0,y1))
+    randos <- cbind(stats::runif(n.traps,0,x1),stats::runif(n.traps,0,y1))
     if (perim == TRUE){
-      peri <- (rbind(c(0, runif(1, 0, x1)),
-                     c(x1, runif(1, 0, y1)),
-                     c(runif(1, 0, x1),y1),
-                     c(runif(1, 0, x1),0)))
+      peri <- (rbind(c(0, stats::runif(1, 0, x1)),
+                     c(x1, stats::runif(1, 0, y1)),
+                     c(stats::runif(1, 0, x1),y1),
+                     c(stats::runif(1, 0, x1),0)))
       traps <- rbind(peri, randos)
     }
     else traps <- randos
 
-    if(min(dist(traps)) >= d){
+    if(min(stats::dist(traps)) >= d){
       traps <- cbind(round(traps[,2],0), round(traps[,1],0), rep(lambda, length(traps[1])))
 
       ## Write out the trapping grid file - the second line is a fix to append the table to a new line - the java file can't have a tab space at the end of the first line
       cat(paste(gridSize), sep="\t", file=paste0(gridname))
       cat("\n", paste(""), file=paste0(gridname), append=TRUE)
-      write.table(traps, file=paste0(gridname),
+      utils::write.table(traps, file=paste0(gridname),
                   na = "",
                   row.names = FALSE,
                   col.names = FALSE,
@@ -208,7 +208,7 @@ gridSize <- round(gridSize, 0)
 
 cat(paste(gridSize), sep="\t", file=gridname)
 cat("\n", paste(""), file=gridname, append=TRUE)
-write.table(traps, file=gridname,
+utils::write.table(traps, file=gridname,
             na = "",
             row.names = FALSE,
             col.names = FALSE,
@@ -269,7 +269,7 @@ make_outbreak_file <- function (traps=traps,
   outbreak_set <- round(outbreak_set, 0)
 
   if (in_orchard == FALSE){
-    hpts <- chull(traps[,1:2])
+    hpts <- grDevices::chull(traps[,1:2])
     hpts <- c(hpts, hpts[1])
     polyline <- traps[,1:2][hpts, ]
     polytemp <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(polyline)), ID=1)))
@@ -324,7 +324,7 @@ make_outbreak_file <- function (traps=traps,
 
   #outbreak_set <- round(outbreak_set, 1)
 
-  write.table(outbreak_set, outbreak_name,
+  utils::write.table(outbreak_set, outbreak_name,
               na = "",
               row.names = FALSE,
               col.names = FALSE,

@@ -34,8 +34,8 @@ make_random_block <- function (n.sides=4,
     angle <- (2*pi)/nSides
 
     # Randomize the radii/angles
-    radii <- rnorm(nSides, radius, radius/10)
-    angles <- rnorm(nSides, angle, angle/10) * 1:nSides
+    radii <- stats::rnorm(nSides, radius, radius/10)
+    angles <- stats::rnorm(nSides, angle, angle/10) * 1:nSides
     angles <- sort(angles)
 
     points <- list(x=NULL, y=NULL)
@@ -65,7 +65,7 @@ make_random_block <- function (n.sides=4,
 
   poly1 <- sp::Polygon(as.matrix(as.data.frame(p)))
 
-  poly1 <- sp::SpatialPolygons(list(sp::Polygons(list(poly1), ID = "test")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+  poly1 <- sp::SpatialPolygons(list(sp::Polygons(list(poly1), ID = "test")), proj4string=sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 
   #poly1 <- mapview::coords2Polygons(as.matrix(as.data.frame(p)), ID="test")
 
@@ -181,10 +181,10 @@ make_random_traps <- function (block=block,
 
         while ( marker1 > n.traps){
           all.pts <- sp::makegrid(poly1, n.traps, cellsize = flexible.size)
-          all.pts <- SpatialPoints(all.pts)
+          all.pts <- sp::SpatialPoints(all.pts)
           all.pts <- rgeos::gIntersection(all.pts, poly1)
           plot (poly1)
-          points (all.pts)
+          graphics::points (all.pts)
           flexible.size <- flexible.size * 1.01
           marker1 <- length (all.pts)
         }
@@ -200,13 +200,13 @@ make_random_traps <- function (block=block,
         #all.pts@coords <- all.pts@coords[sample(nrow(all.pts@coords), n.traps), ]
 
         plot (poly1)
-        points (all.pts)
+        graphics::points (all.pts)
       }
 
 
       if (n.traps != 1){
 
-        if (min(dist(all.pts) > min.dist, na.rm=T)){
+        if (min(stats::dist(all.pts) > min.dist, na.rm=T)){
           halt <- halt + 1
         }
       }else{
@@ -219,7 +219,7 @@ make_random_traps <- function (block=block,
 
       raster::plot (D)
       raster::plot (poly1, add=T)
-      points (all.pts, pch=20)
+      graphics::points (all.pts, pch=20)
 
       return (list(all.pts, poly1))}else{
         return(message("We tried 1000 times, but min.dist is too large..."))
@@ -227,15 +227,15 @@ make_random_traps <- function (block=block,
   }
 
   if (perim == T){
-    k <- as(poly1, "SpatialLines")
-    all.pts <- spsample(k, n.traps, type="regular")
+    k <- methods::as(poly1, "SpatialLines")
+    all.pts <- sp::spsample(k, n.traps, type="regular")
 
     all.pts <- all.pts@coords
     row.names(all.pts) <- seq_along(all.pts[,1])
 
     raster::plot (D)
     raster::plot (poly1, add=T)
-    points (all.pts, pch=20)
+    graphics::points (all.pts, pch=20)
 
     return (list(all.pts, poly1, D))
   }
@@ -255,7 +255,7 @@ make_block_grid <- function(gridname="footest",
 
   traps <- cbind(as.data.frame(traps), lambda=rep(lambda, length(as.data.frame(traps)[,1])))
 
-  gridSize <- extent(outbreak)[c(2,4)]
+  gridSize <- raster::extent(traps)[c(2,4)]
 
   #gridSize <- c(max(traps[,"Latitude"]) , max(traps[,"Longitude"]))
 
@@ -264,7 +264,7 @@ make_block_grid <- function(gridname="footest",
 
   cat(paste(gridSize), sep="\t", file=gridname)
   cat("\n", paste(""), file=gridname, append=TRUE)
-  write.table(traps, file=gridname,
+  utils::write.table(traps, file=gridname,
               na = "",
               row.names = FALSE,
               col.names = FALSE,
@@ -306,13 +306,13 @@ make_block_outbreak <- function (traps=traps,
                                                n=nOutbreaks,
                                                type="random"))
 
-    traps_sp <- SpatialPoints(traps)
+    traps_sp <- sp::SpatialPoints(traps)
 
     plot (block)
-    axis(1)
-    axis(2)
-    points (traps_sp, pch=20)
-    points (outbreak_set)
+    graphics::axis(1)
+    graphics::axis(2)
+    graphics::points (traps_sp, pch=20)
+    graphics::points (outbreak_set)
 
 
 
@@ -330,8 +330,8 @@ make_block_outbreak <- function (traps=traps,
       donut_buff <- rgeos::gDifference(outbreak_buffer, orchard_buffer)
 
       #take the traps object, convert to spatial and give same extent as the donut
-      traps_sp <- SpatialPoints(traps)
-      traps_sp@bbox <- as.matrix(extent(donut_buff))
+      traps_sp <- sp::SpatialPoints(traps)
+      traps_sp@bbox <- as.matrix(raster::extent(donut_buff))
 
       #now shift these so that the bottom left corner is 0, 0
       donut_buff <- maptools::elide(donut_buff, shift=c(0-raster::extent(donut_buff)[1], 0-raster::extent(donut_buff)[3]))
@@ -344,10 +344,10 @@ make_block_outbreak <- function (traps=traps,
       outbreak_set <- as.data.frame(outbreak_set)
 
       plot (donut_buff)
-      axis(1)
-      axis(2)
-      points (traps_sp, pch=20)
-      points (outbreak_set)}else{
+      graphics::axis(1)
+      graphics::axis(2)
+      graphics::points (traps_sp, pch=20)
+      graphics::points (outbreak_set)}else{
         return(message("Outbreak buffer cannot be smaller than orchard buffer"))
 
       }
@@ -356,7 +356,7 @@ make_block_outbreak <- function (traps=traps,
 
 
 
-  write.table(outbreak_set, outbreak_name,
+  utils::write.table(outbreak_set, outbreak_name,
               na = "",
               row.names = FALSE,
               col.names = FALSE,
