@@ -1,5 +1,3 @@
-#' Retrieve a Java instance of TrapGrid.
-#'
 #' Retrieve a Java instance of TrapGrid
 #'
 #' @param filepath Path of the trapping grid file
@@ -7,6 +5,7 @@
 #' @param nFlies Number of flies per outbreak
 #' @param nSim Number of simulations
 #' @param D Dispersal parameter
+#' @param outbreaks Outbreaks file
 #' @return Model output
 #' @export
 
@@ -191,8 +190,7 @@ make_random_grid <- function(n.traps=10,
 #' Setup actual trapping grid
 #'
 #' @param gridname Name for the trapping grid file to be output
-#' @param gridSize Describes the bottom right corner in metres, from the top left corner which is 0,0
-#' @param gridSpace The distance between regularly spaced traps
+#' @param traps Trap coordinates
 #' @param lambda The trap efficiency
 #' @return A trapping grid text file
 #' @export
@@ -224,11 +222,12 @@ return(print(paste("Trapping grid ", gridname, "written")))
 #'
 #' @param traps Name for the trapping grid file to be output
 #' @param in_orchard True/False flag for whether flies can emerge from within orchard
-#' @param nSim Number of sims
+#' @param nOutbreaks Number of outbreaks
 #' @param outbreak_name Name of file to write out
 #' @param lambda The trap efficiency
 #' @param per_area Flag to override the num_outbreaks and do it by area
 #' @param orchard_buf Distance around orchard (in metres) that outbreaks cannot occur
+#' @param outbreak_buf Distance around orchard that outbreaks can occur
 #' @return A trapping grid text file
 #' @export
 

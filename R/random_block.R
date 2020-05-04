@@ -62,7 +62,12 @@ make_random_block <- function (n.sides=4,
 
 
   p <- rbind(p, p[1,])
-  poly1 <- mapview::coords2Polygons(as.matrix(as.data.frame(p)), ID="test")
+
+  poly1 <- sp::Polygon(as.matrix(as.data.frame(p)))
+
+  poly1 <- sp::SpatialPolygons(list(sp::Polygons(list(poly1), ID = "test")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
+  #poly1 <- mapview::coords2Polygons(as.matrix(as.data.frame(p)), ID="test")
 
 
   ## need to rescale to 0, 0

@@ -19,4 +19,6 @@ Imports:
     rgeos,
     sp,
     maptools,
-    mapview
+    mapview,
+    tidyr,
+    ggsci

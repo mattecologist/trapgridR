@@ -2,7 +2,7 @@
 % Please edit documentation in R/trapgridR.R
 \name{trapgridR}
 \alias{trapgridR}
-\title{Retrieve a Java instance of TrapGrid.}
+\title{Retrieve a Java instance of TrapGrid}
 \usage{
 trapgridR(
   filepath = paste0(system.file(package = "trapgridR"), "/java/foogrid"),
@@ -23,6 +23,8 @@ trapgridR(
 \item{nSim}{Number of simulations}
 
 \item{D}{Dispersal parameter}
+
+\item{outbreaks}{Outbreaks file}
 }
 \value{
 Model output
