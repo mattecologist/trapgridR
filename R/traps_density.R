@@ -18,7 +18,7 @@ traps_per_hectare <- function(points=points,
 
     D <- raster:: distanceFromPoints(object = r1, xy = points)
     D <- raster::mask (D, r1)
-    mxd <- which.max(D)
+    mxd <- raster::which.max(D)
     pt <- xyFromCell(D, mxd)
 
     points <- rbind(points, pt)
@@ -57,7 +57,7 @@ traps_per_distance <- function(points=points,
     D <- raster::mask (D, r1)
 
 
-    mxd <- which.max(D)
+    mxd <- raster::which.max(D)
     trap.dist <- raster::extract (D, xyFromCell(D, mxd))
 
     if (trap.dist > dist.thresh){
