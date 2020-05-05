@@ -255,9 +255,9 @@ make_block_grid <- function(gridname="footest",
 
   traps <- cbind(as.data.frame(traps), lambda=rep(lambda, length(as.data.frame(traps)[,1])))
 
-  gridSize <- raster::extent(traps)[c(2,4)]
+  #gridSize <- raster::extent(traps)[c(2,4)]
 
-  #gridSize <- c(max(traps[,"Latitude"]) , max(traps[,"Longitude"]))
+  gridSize <- c(max(traps[,"x"]) , max(traps[,"y"]))
 
 
   gridSize <- round(gridSize, 0)
@@ -308,7 +308,7 @@ make_block_outbreak <- function (traps=traps,
 
     traps_sp <- sp::SpatialPoints(traps)
 
-    plot (block)
+    raster::plot (block)
     graphics::axis(1)
     graphics::axis(2)
     graphics::points (traps_sp, pch=20)
