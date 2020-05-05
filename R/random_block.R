@@ -183,8 +183,8 @@ make_random_traps <- function (block=block,
           all.pts <- sp::makegrid(poly1, n.traps, cellsize = flexible.size)
           all.pts <- sp::SpatialPoints(all.pts)
           all.pts <- rgeos::gIntersection(all.pts, poly1)
-          plot (poly1)
-          graphics::points (all.pts)
+          # base::plot (poly1)
+          # graphics::points (all.pts)
           flexible.size <- flexible.size * 1.01
           marker1 <- length (all.pts)
         }
@@ -199,8 +199,8 @@ make_random_traps <- function (block=block,
 
         #all.pts@coords <- all.pts@coords[sample(nrow(all.pts@coords), n.traps), ]
 
-        plot (poly1)
-        graphics::points (all.pts)
+        # plot (poly1)
+        # graphics::points (all.pts)
       }
 
 
@@ -217,9 +217,9 @@ make_random_traps <- function (block=block,
 
     if (counter < 1000){
 
-      raster::plot (D)
-      raster::plot (poly1, add=T)
-      graphics::points (all.pts, pch=20)
+      # raster::plot (D)
+      # raster::plot (poly1, add=T)
+      # graphics::points (all.pts, pch=20)
 
       return (list(all.pts, poly1))}else{
         return(message("We tried 1000 times, but min.dist is too large..."))
@@ -233,9 +233,9 @@ make_random_traps <- function (block=block,
     all.pts <- all.pts@coords
     row.names(all.pts) <- seq_along(all.pts[,1])
 
-    raster::plot (D)
-    raster::plot (poly1, add=T)
-    graphics::points (all.pts, pch=20)
+    # raster::plot (D)
+    # raster::plot (poly1, add=T)
+    # graphics::points (all.pts, pch=20)
 
     return (list(all.pts, poly1, D))
   }
@@ -308,11 +308,11 @@ make_block_outbreak <- function (traps=traps,
 
     traps_sp <- sp::SpatialPoints(traps)
 
-    raster::plot (block)
-    graphics::axis(1)
-    graphics::axis(2)
-    graphics::points (traps_sp, pch=20)
-    graphics::points (outbreak_set)
+    # raster::plot (block)
+    # graphics::axis(1)
+    # graphics::axis(2)
+    # graphics::points (traps_sp, pch=20)
+    # graphics::points (outbreak_set)
 
 
 
@@ -343,11 +343,12 @@ make_block_outbreak <- function (traps=traps,
       outbreak_set <- sp::spsample(donut_buff,n=nOutbreaks,type="random")
       outbreak_set <- as.data.frame(outbreak_set)
 
-      plot (donut_buff)
-      graphics::axis(1)
-      graphics::axis(2)
-      graphics::points (traps_sp, pch=20)
-      graphics::points (outbreak_set)}else{
+      # base::plot (donut_buff)
+      # graphics::axis(1)
+      # graphics::axis(2)
+      # graphics::points (traps_sp, pch=20)
+      # graphics::points (outbreak_set)
+      }else{
         return(message("Outbreak buffer cannot be smaller than orchard buffer"))
 
       }

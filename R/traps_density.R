@@ -25,9 +25,9 @@ traps_per_hectare <- function(points=points,
     points <- rbind(points, pt)
   }
 
-  raster::plot (D)
-  plot(poly, add=T)
-  points (points, pch=20)
+  # raster::plot (D)
+  # plot(poly, add=T)
+  # points (points, pch=20)
 
   return(points)
 
@@ -88,9 +88,9 @@ traps_per_distance <- function(points=points,
 
   }
 
-  raster::plot (D)
-  graphics::plot(poly, add=T)
-  graphics::points (points, pch=20)
+  # raster::plot (D)
+  # plot(poly, add=T)
+  # graphics::points (points, pch=20)
 
 
   row.names(points) <- seq_along(points[,1])
