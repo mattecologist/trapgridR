@@ -75,7 +75,7 @@ make_random_block <- function (n.sides=4,
 
   poly1 <- maptools::elide(poly1, shift=c(0-raster::extent(poly1)[1], 0-raster::extent(poly1)[3]))
 
-  raster::plot (poly1)
+  #raster::plot (poly1)
 
   return(poly1)
 }
@@ -287,6 +287,7 @@ make_block_grid <- function(gridname="footest",
 #' @return A trapping grid text file
 #' @export
 
+
 make_block_outbreak <- function (traps=traps,
                                  block=block,
                                  in_orchard = FALSE,
@@ -298,7 +299,7 @@ make_block_outbreak <- function (traps=traps,
   # TrapGrid: "You may supply an optional Outbreak file, which is a two-column tab-delimited file containing the x and y locations of outbreaks to be simulated."
 
   donut_buff <- block
-  # Within block is simple.
+  # Within block is simple
 
   if (in_orchard == TRUE){
 
@@ -331,11 +332,15 @@ make_block_outbreak <- function (traps=traps,
 
       #take the traps object, convert to spatial and give same extent as the donut
       traps_sp <- sp::SpatialPoints(traps)
-      traps_sp@bbox <- as.matrix(raster::extent(donut_buff))
+
+      # as.matrix(raster::extent(donut_buff)) # This seems to no longer work...
+
+      traps_sp@bbox <- as.matrix(sp::bbox(donut_buff))
 
       #now shift these so that the bottom left corner is 0, 0
       donut_buff <- maptools::elide(donut_buff, shift=c(0-raster::extent(donut_buff)[1], 0-raster::extent(donut_buff)[3]))
-      traps_sp <- maptools::elide(traps_sp, shift=c(0-raster::extent(traps_sp)[1], 0-raster::extent(traps_sp)[3]))
+      traps_sp <- maptools::elide(traps_sp, shift=c(0-extent(traps_sp)[1], 0-extent(traps_sp)[3]))
+      #traps_sp  <- maptools::elide(traps_sp , shift=c(0-raster::extent(donut_buff)[1], 0-raster::extent(donut_buff)[3]))
 
 
       # Now can generate the outbreak points
@@ -354,8 +359,6 @@ make_block_outbreak <- function (traps=traps,
       }
 
   }
-
-
 
   utils::write.table(outbreak_set, outbreak_name,
               na = "",
@@ -376,4 +379,5 @@ make_block_outbreak <- function (traps=traps,
   ## need to return some parameters here to reset the position of the trapping grid prior
   ## to using make_actual_grid (gridSize in particular)
 }
+
 

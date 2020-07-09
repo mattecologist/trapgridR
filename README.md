@@ -35,14 +35,23 @@ devtools::install_github("mattecologist/trapgridR")
 ## Example
 
 ``` r
-library(trapgridR)
+library (trapgridR)
 #> Loading required package: rJava
+library (ggplot2)
+library (sp)
+library (raster)
+library (maptools)
+#> Checking rgeos availability: TRUE
 ```
 
-There is a simple function to make a regular grid across a given area
+At the most basic level, there is a simple function to make a regular
+grid across a given area
 
 ``` r
-make_regular_grid("my_grid")
+make_regular_grid("my_grid", #name of file to write out for TrapGrid
+  gridSize = c(364, 572), # upper right corner coordinates (lower left is always 0, 0)
+  gridSpace = 80, # spacing of traps in metres
+  lambda = 0.02) # lambda of the traps
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
@@ -91,7 +100,7 @@ make_regular_grid("my_grid")
     #> [40,]  560  320 0.02
 
 Or make a random grid of at least a minimum distance apart, that can
-include perimeter traps or not
+include additional perimeter traps or not
 
 ``` r
 make_random_grid(n.traps=5, gridname="my_grid", perim=TRUE)
@@ -100,27 +109,76 @@ make_random_grid(n.traps=5, gridname="my_grid", perim=TRUE)
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
     #>       [,1] [,2] [,3]
-    #>  [1,]   82    0 0.02
-    #>  [2,]  489 2000 0.02
-    #>  [3,] 2000 1604 0.02
-    #>  [4,]    0 1289 0.02
-    #>  [5,] 1283 1017 0.02
-    #>  [6,] 1647 1886 0.02
-    #>  [7,] 1164  466 0.02
-    #>  [8,]  514  159 0.02
-    #>  [9,] 1166 1567 0.02
+    #>  [1,] 1690    0 0.02
+    #>  [2,] 1438 2000 0.02
+    #>  [3,] 2000 1019 0.02
+    #>  [4,]    0 1432 0.02
+    #>  [5,]   38  550 0.02
+    #>  [6,]  676  713 0.02
+    #>  [7,] 1819 1847 0.02
+    #>  [8,] 1188 1447 0.02
+    #>  [9,] 1064  964 0.02
+
+## Simulating Orchards / Management areas
+
+Alternatively, you might have a polygon/shapefile of an orchard you want
+to explore different scenarios over. You can also build randomly shaped
+and sized polygons to investigate. We were interseted in orchard
+“blocks” so have used that term to describe them, but it can be any
+management area that is appropriate.
+
+``` r
+new.block <- make_random_block()  #specify the size of the block in metres squared
+
+new.traps <- make_random_traps(block=new.block, n.traps = 5, min.dist = 50) # add traps to the block - here just 4 random traps all at least 50 meters apart
+
+
+plot (new.block) # the traps object stores the new block polygon too
+points (new.traps[[1]], pch=20) # the traps are here as point
+```
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+# Setting outbreak locations
+
+Its possible to take the block polygon and seed all the outbreaks either
+within or outside of the block
+
+``` r
+outbreaks <- make_block_outbreak(traps= new.traps[1], block = new.traps[[2]],
+                                 nOutbreaks = 10)
+#> [1] "Outbreak file outbreaks written"
+
+plot (outbreaks$buffer_region)
+points (outbreaks$outbreak_set)
+points (outbreaks$traps_sp, pch=20)
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+``` r
+make_block_grid(gridname = "orchard_traps",
+                traps = outbreaks$traps_sp,
+                lambda = 0.05)
+#> [1] "Trapping grid  orchard_traps written"
+```
+
+``` r
+model.temp <- trapgridR("orchard_traps", nDays=14, nFlies=50, D=10^3,
+                        outbreaks = "outbreaks")
+```
 
 Simulations can be setup in R and results stored as objects
 
 ``` r
-model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 100, nSim=20, D=10^5)
+model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 10, nSim=20, D=10^5)
 ```
 
 Simulation results can be plotted from the model objects.
 
 ``` r
 library (ggplot2)
-ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability))+
+ggplot(model.temp$simRuns, aes(Day, 1-Cumulative.Escape.Probability))+
   geom_line(aes(group=SimRun), colour=viridis::viridis(3)[1], alpha=0.3)+
   geom_smooth(method="loess", colour=viridis::viridis(3)[2])+
   theme_dark()+
@@ -139,37 +197,14 @@ Additionally, fly locations from the simulation can be plotted to
 examine movement patterns….
 
 ``` r
-ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
+ggplot (model.temp$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.factor(Simulation.Number)))+
   geom_point()+
   facet_wrap(.~as.integer(Day))+
-  scale_colour_viridis_c()+
+  scale_colour_viridis_d()+
   theme_minimal()
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
-
-…..which is a bit messy, so using `{gganimate}` can make an animation:
-
-``` r
-library (gganimate)
-#> No renderer backend detected. gganimate will default to writing frames to separate files
-#> Consider installing:
-#> - the `gifski` package for gif output
-#> - the `av` package for video output
-#> and restarting the R session
-ggplot (model1$flyLoc[model1$flyLoc$Simulation.Number==1:4,], aes(as.integer(X), as.integer(Y),  colour=Simulation.Number))+
-  geom_point()+
-  transition_time(as.integer(Day)) +
-  scale_colour_viridis_d()+
-  theme_minimal()+
-  facet_wrap(~Simulation.Number, nrow = 2)
-#> Warning: No renderer available. Please install the gifski, av, or magick package
-#> to create animated output
-#> NULL
-```
-
-which isn’t really that useful, except to show each fly is being tracked
-through each simulation :)
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
 We’ve included functions so that actualy trap arrangements can be easily
 be used in R, and are implementing further changes to the model that

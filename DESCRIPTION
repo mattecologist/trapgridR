@@ -22,4 +22,5 @@ Imports:
     mapview,
     tidyr,
     ggsci,
-    methods
+    methods,
+    utils
