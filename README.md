@@ -109,15 +109,15 @@ make_random_grid(n.traps=5, gridname="my_grid", perim=TRUE)
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
     #>       [,1] [,2] [,3]
-    #>  [1,] 1690    0 0.02
-    #>  [2,] 1438 2000 0.02
-    #>  [3,] 2000 1019 0.02
-    #>  [4,]    0 1432 0.02
-    #>  [5,]   38  550 0.02
-    #>  [6,]  676  713 0.02
-    #>  [7,] 1819 1847 0.02
-    #>  [8,] 1188 1447 0.02
-    #>  [9,] 1064  964 0.02
+    #>  [1,]  761    0 0.02
+    #>  [2,] 1205 2000 0.02
+    #>  [3,] 2000  966 0.02
+    #>  [4,]    0 1867 0.02
+    #>  [5,] 1069 1286 0.02
+    #>  [6,]  273  248 0.02
+    #>  [7,] 1520   36 0.02
+    #>  [8,]  294  690 0.02
+    #>  [9,] 1603 1950 0.02
 
 ## Simulating Orchards / Management areas
 
@@ -128,7 +128,11 @@ and sized polygons to investigate. We were interseted in orchard
 management area that is appropriate.
 
 ``` r
-new.block <- make_random_block()  #specify the size of the block in metres squared
+set.seed(3056)
+
+new.block <- make_random_block(n.sides = 4,         # specify the number of sides to the block 
+                               regular.block = F,   # specify if all sides equal or random
+                               block.size = 1e+05)  # specify the size of the block in metres squared
 
 new.traps <- make_random_traps(block=new.block, n.traps = 5, min.dist = 50) # add traps to the block - here just 4 random traps all at least 50 meters apart
 
@@ -145,8 +149,12 @@ Its possible to take the block polygon and seed all the outbreaks either
 within or outside of the block
 
 ``` r
-outbreaks <- make_block_outbreak(traps= new.traps[1], block = new.traps[[2]],
-                                 nOutbreaks = 10)
+set.seed (5082)
+
+outbreaks <- make_block_outbreak(traps= new.traps[1], 
+                                 block = new.traps[[2]],
+                                 nOutbreaks = 10,    # how many outbreak locations 
+                                 outbreak_buf = 500) # buffer around the orchard for outbreaks to seeded in
 #> [1] "Outbreak file outbreaks written"
 
 plot (outbreaks$buffer_region)
@@ -159,19 +167,13 @@ points (outbreaks$traps_sp, pch=20)
 ``` r
 make_block_grid(gridname = "orchard_traps",
                 traps = outbreaks$traps_sp,
-                lambda = 0.05)
+                lambda = 0.02) # trap attractiveness value (1/0.02 = 50 metres for 65% capture probability)
 #> [1] "Trapping grid  orchard_traps written"
 ```
 
 ``` r
-model.temp <- trapgridR("orchard_traps", nDays=14, nFlies=50, D=10^3,
+model.temp <- trapgridR("orchard_traps", nDays=14, nFlies=50, D=10^4,
                         outbreaks = "outbreaks")
-```
-
-Simulations can be setup in R and results stored as objects
-
-``` r
-model1 <- trapgridR(filepath="my_grid", nDays = 14, nFlies = 10, nSim=20, D=10^5)
 ```
 
 Simulation results can be plotted from the model objects.
@@ -180,21 +182,20 @@ Simulation results can be plotted from the model objects.
 library (ggplot2)
 ggplot(model.temp$simRuns, aes(Day, 1-Cumulative.Escape.Probability))+
   geom_line(aes(group=SimRun), colour=viridis::viridis(3)[1], alpha=0.3)+
-  geom_smooth(method="loess", colour=viridis::viridis(3)[2])+
+  geom_smooth(method="gam", colour=viridis::viridis(3)[2])+
   theme_dark()+
   scale_x_continuous(expand=c(0.01,0))+
   scale_y_continuous(expand=c(0,0.01))+
   theme_minimal()
-#> `geom_smooth()` using formula 'y ~ x'
+#> `geom_smooth()` using formula 'y ~ s(x, bs = "cs")'
 ```
 
 <img src="man/figures/README-plot of simulation results-1.png" width="100%" />
 The 1-cumulative escape probability can be thought of as the detection
-probability - which only reaches around 0.25 after 2 weeks in this
-example.
+probability.
 
 Additionally, fly locations from the simulation can be plotted to
-examine movement patterns….
+examine the diffusion process across the landscape over time.
 
 ``` r
 ggplot (model.temp$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.factor(Simulation.Number)))+
@@ -204,7 +205,7 @@ ggplot (model.temp$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.factor(S
   theme_minimal()
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 We’ve included functions so that actualy trap arrangements can be easily
 be used in R, and are implementing further changes to the model that
