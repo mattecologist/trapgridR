@@ -75,7 +75,7 @@ ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability))+
   theme_minimal()
 
 ```
-Each the 1-cumulative escape probability can be thought of as the detection probability - which only reaches around 0.25 after 2 weeks in this example.
+Each of the 1-cumulative escape probability can be thought of as the detection probability - which only reaches around 0.25 after 2 weeks in this example.
 
 
 Additionally, fly locations from the simulation can be plotted to examine movement patterns....
