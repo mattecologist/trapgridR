@@ -53,15 +53,18 @@ library (maptools)
 
 At the most basic level, there is a simple function to make a regular grid across a given area
 ```{r fig.width=5, fig.height=5}
-make_regular_grid("my_grid", #name of file to write out for TrapGrid
+traps <- make_regular_grid("my_grid", #name of file to write out for TrapGrid
   gridSize = c(364, 572), # upper right corner coordinates (lower left is always 0, 0)
   gridSpace = 80, # spacing of traps in metres
   lambda = 0.02) # lambda of the traps
+
+plot (traps[,1:2])
 ```
 Or make a random grid of at least a minimum distance apart, that can include additional perimeter traps or not
 
 ```{r fig.width=5, fig.height=5}
-make_random_grid(n.traps=5, gridname="my_grid", perim=TRUE)
+traps <- make_random_grid(n.traps=5, gridname="my_grid", perim=TRUE)
+plot (traps[,1:2])
 ```
 
 ## Simulating Orchards / Management areas
@@ -83,7 +86,7 @@ points (new.traps[[1]], pch=20) # the traps are here as point
 
 ```
 
-# Setting outbreak locations
+## Setting outbreak locations
 
 Its possible to take the block polygon and seed all the outbreaks either within or outside of the block
 ```{r}

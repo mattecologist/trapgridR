@@ -111,7 +111,7 @@ make_regular_grid <- function(gridname="footest",
 ## Generate traps with a fixed lambda value
 traps <- cbind(expand.grid(seq(from=0, to=gridSize[1], by=gridSpace), seq(from=0, to=gridSize[2], by=gridSpace)), lambda)
 traps <- cbind(traps[,2], traps[,1], traps[,3])
-plot (traps[,1:2])
+
 
 
 ## Write out the trapping grid file - the second line is a fix to append the table to a new line - the java file can't have a tab space at the end of the first line
@@ -179,7 +179,7 @@ make_random_grid <- function(n.traps=10,
                   col.names = FALSE,
                   sep = "\t",
                   append=TRUE)
-      plot (traps[,2]~traps[,1])
+
 
       return(traps)
       message("Trapping grid ", gridname, " written")}
