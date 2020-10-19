@@ -42,11 +42,13 @@ ggplot(model1$simRuns, aes(Day, 1-Cumulative.Escape.Probability, colour=SimRun, 
 ```
 
 ```{r fig.width=7, fig.height=6}
-ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
-  geom_point()+
-  facet_wrap(.~as.integer(Day))+
-  scale_colour_viridis_c()+
-  theme_dark()
+# commented out until fly loc working in Java
+
+# ggplot (model1$flyLoc, aes(as.integer(X), as.integer(Y),  colour=as.integer(Simulation.Number)))+
+#   geom_point()+
+#   facet_wrap(.~as.integer(Day))+
+#   scale_colour_viridis_c()+
+#   theme_dark()
 
 ```
 

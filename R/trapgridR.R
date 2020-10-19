@@ -40,7 +40,14 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   outfile <- data.frame(cbind(hold[seq(1, length(hold), 2)], hold[seq(2, length(hold), 2)]))
   colnames(outfile) <- c("Day",	"Av Cumulative Escape Probability")
 
-  fly_loc <- utils::read.csv("fly.csv", header = FALSE)
+
+  #hashed out until Java side fixed....
+  #fly_loc <- utils::read.csv("fly.csv", header = FALSE)
+
+  ##check if it read anything in...
+
+  if (exists("fly_loc")){
+
   colnames(fly_loc) <- c("Simulation Number", "Day", "X", "Y")
 
   #Remove closing parenthesis from Y Coord
@@ -54,6 +61,7 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
 
   # add number of each fly per rep
   fly_loc$flynum <- rep(1:nFlies, nDays)
+  }
 
   ## Read output for for all individual simulations
   hold <- readLines("out.txt")
@@ -78,6 +86,8 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   #if (file.exists(fn2)){file.remove(fn2)}
 
 
+  if (exists("fly_loc")){
+
   # add number of reps
   fly_loc$Simulation.Number <-rep(1:length(unique(simRuns$Outbreak.Location)), each=nFlies*nDays)
 
@@ -87,6 +97,12 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
 
   out_list <- list(simRuns, fly_loc)
   names(out_list) <- c("simRuns", "flyLoc")
+  }else{
+    out_list <- list(simRuns)
+    names(out_list) <- c("simRuns")
+  }
+
+
 
   return(out_list)
 }
