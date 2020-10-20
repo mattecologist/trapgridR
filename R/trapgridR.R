@@ -20,19 +20,23 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   rJava::.jaddClassPath(paste0(system.file(package="trapgridR"), "/java/TrapGrid.jar"))
   trapgrid <- rJava::.jnew('com.reallymany.trapgrid.Driver')
 
+## --calculateOneOrMoreCapture was added by Nick Manoukis on most recent version
+## in future: makes this selectable for the package.
 
    if (!is.null(outbreaks)){
     rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
                                                  "-nf", nFlies,
                                                  "-nd", nDays,
                                                  "-dc", D,
-                                                 "-ob", outbreaks), returnSig = "V")
+                                                 "-ob", outbreaks,
+                                                 "--calculateOneOrMoreCapture"), returnSig = "V")
    } else {
      rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
                                                   "-nf", nFlies,
                                                  "-nd", nDays,
                                                   "-ns", nSim,
-                                                 "-dc", D), returnSig = "V")
+                                                 "-dc", D,
+                                                 "--calculateOneOrMoreCapture"), returnSig = "V")
    }
 
 
