@@ -14,31 +14,54 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
                     nFlies =100, #[-nf <number of flies per outbreak>]
                     nSim =10, # [-ns <number of simulations>]
                     D= 10^5,
-                    outbreaks=NULL) {
+                    outbreaks=NULL,
+                    TGA = FALSE) {
   rJava::.jinit()
   rJava::.jaddLibrary('trapgrid', paste0(system.file(package="trapgridR"), "/java/TrapGrid.jar"))
   rJava::.jaddClassPath(paste0(system.file(package="trapgridR"), "/java/TrapGrid.jar"))
   trapgrid <- rJava::.jnew('com.reallymany.trapgrid.Driver')
 
 ## --calculateOneOrMoreCapture was added by Nick Manoukis on most recent version
-## in future: makes this selectable for the package.
+## TGA
 
-   if (!is.null(outbreaks)){
-    rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
-                                                 "-nf", nFlies,
-                                                 "-nd", nDays,
-                                                 "-dc", D,
-                                                 "-ob", outbreaks,
-                                                 "--calculateOneOrMoreCapture"), returnSig = "V")
-   } else {
-     rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
-                                                  "-nf", nFlies,
-                                                 "-nd", nDays,
-                                                  "-ns", nSim,
-                                                 "-dc", D,
-                                                 "--calculateOneOrMoreCapture"), returnSig = "V")
-   }
 
+  if (TGA == TRUE){
+
+    if (!is.null(outbreaks)){
+      rJava::.jcall(obj=trapgrid, method="main", c("--calculateOneOrMoreCapture -tg", filepath,
+                                                   "-nf", nFlies,
+                                                   "-nd", nDays,
+                                                   "-dc", D,
+                                                   "-ob", outbreaks,
+                                                   "--calculateOneOrMoreCapture"), returnSig = "V")
+    } else {
+      rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
+                                                   "-nf", nFlies,
+                                                   "-nd", nDays,
+                                                   "-ns", nSim,
+                                                   "-dc", D,
+                                                   "--calculateOneOrMoreCapture"), returnSig = "V")
+    }
+  }
+
+## TGO is the original implementation
+
+  if (TGA == FALSE){
+
+    if (!is.null(outbreaks)){
+      rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
+                                                   "-nf", nFlies,
+                                                   "-nd", nDays,
+                                                   "-dc", D,
+                                                   "-ob", outbreaks), returnSig = "V")
+    } else {
+      rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
+                                                   "-nf", nFlies,
+                                                   "-nd", nDays,
+                                                   "-ns", nSim,
+                                                   "-dc", D), returnSig = "V")
+    }
+  }
 
   hold <- scan(paste0("out.txt"), skip=4, blank.lines.skip = TRUE, nlines=nDays)
   outfile <- data.frame(cbind(hold[seq(1, length(hold), 2)], hold[seq(2, length(hold), 2)]))
