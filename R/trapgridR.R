@@ -28,7 +28,7 @@ trapgridR<-function(filepath= paste0(system.file(package="trapgridR"), "/java/fo
   if (TGA == TRUE){
 
     if (!is.null(outbreaks)){
-      rJava::.jcall(obj=trapgrid, method="main", c("--calculateOneOrMoreCapture -tg", filepath,
+      rJava::.jcall(obj=trapgrid, method="main", c("-tg", filepath,
                                                    "-nf", nFlies,
                                                    "-nd", nDays,
                                                    "-dc", D,
