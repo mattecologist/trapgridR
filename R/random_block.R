@@ -355,7 +355,7 @@ make_block_outbreak <- function (traps=traps,
 
       # Now can generate the outbreak points
 
-      outbreak_set <- sp::spsample(donut_buff,n=nOutbreaks,type="random")
+      outbreak_set <- sp::spsample(donut_buff,n=nOutbreaks,type="random", iter=10)
       outbreak_set <- as.data.frame(outbreak_set)
 
       # base::plot (donut_buff)
