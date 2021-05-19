@@ -173,7 +173,7 @@ make_random_traps <- function (block=block,
       if (regular.traps == T){
         #all.pts <- sp::spsample(poly1, n.traps, type="regular") ## need to get this to adhere to cellsize
 
-        flexible.size <- 100
+        flexible.size <- 50
 
         all.pts <- sp::makegrid(poly1, cellsize = flexible.size)
 

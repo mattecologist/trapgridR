@@ -4,7 +4,12 @@
 \alias{traps_per_distance}
 \title{Random traps per distance from trap}
 \usage{
-traps_per_distance(points = points, poly = poly, dist.thresh = 100)
+traps_per_distance(
+  points = points,
+  poly = poly,
+  dist.thresh = 100,
+  n.iter = 10
+)
 }
 \arguments{
 \item{points}{The two-column existing trap coordinates}
@@ -12,6 +17,8 @@ traps_per_distance(points = points, poly = poly, dist.thresh = 100)
 \item{poly}{The polygon of the orchard/block boundary}
 
 \item{dist.thresh}{Minimum distance between all traps and all parts of the block}
+
+\item{n.iter}{Number of iterations for `spsample` to use - sometimes this needs to be above 10}
 }
 \value{
 2 column coordinates of all traps

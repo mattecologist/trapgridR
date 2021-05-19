@@ -39,13 +39,15 @@ traps_per_hectare <- function(points=points,
 #' @param points The two-column existing trap coordinates
 #' @param poly The polygon of the orchard/block boundary
 #' @param dist.thresh Minimum distance between all traps and all parts of the block
+#' @param n.iter Number of iterations for `spsample` to use - sometimes this needs to be above 10
 #' @author Matt Hill
 #' @return 2 column coordinates of all traps
 #' @export
 #'
 traps_per_distance <- function(points=points,
                                poly=poly,
-                               dist.thresh = 100){
+                               dist.thresh = 100,
+                               n.iter = 10){
 
   block_size = sqrt(sum(raster::area(poly)))
   r <- raster::raster(ncols=round(block_size, 0), nrows=round(block_size, 0), crs=NULL, ext=raster::extent(poly))
@@ -73,7 +75,7 @@ traps_per_distance <- function(points=points,
       if (sum(raster::area(poly.temp))/dist.thresh^2 > 2.5){
         points.temp <- (sp::makegrid(poly.temp, cellsize = 10))
       } else{
-        points.temp <- as.data.frame(sp::spsample(poly.temp, 1, type="regular"))
+        points.temp <- as.data.frame(sp::spsample(poly.temp, 1, type="regular", iter=n.iter))
 
       }
 
